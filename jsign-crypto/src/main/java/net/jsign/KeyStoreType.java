@@ -49,6 +49,7 @@ import net.jsign.jca.OracleCloudCredentials;
 import net.jsign.jca.OracleCloudSigningService;
 import net.jsign.jca.PIVCardSigningService;
 import net.jsign.jca.SigningServiceJcaProvider;
+import net.jsign.jca.CustomProviderService;
 
 /**
  * Type of a keystore.
@@ -107,6 +108,41 @@ public enum KeyStoreType {
             }
 
             return ks;
+        }
+    },
+
+    /**
+     * Keystore type uses a custom signing service that communicates with an API endpoint.
+     * The `keystore` parameter specifies the API endpoint URL.
+     * The `storepass` parameter specifies the API key for authentication.
+     *
+     * Usage:
+     *   --storetype CUSTOMPROVIDER
+     *   --keystore <API endpoint URL>
+     *   --storepass <API key>
+     */
+    CUSTOMPROVIDER(false, false, false) {
+        @Override
+        void validate(KeyStoreBuilder params) {
+            if (params.keystore() == null || params.keystore().isEmpty()) {
+                throw new IllegalArgumentException("keystore must specify the >API endpoint URL< for CUSTOMPROVIDER");
+            }
+            if (params.storepass() == null || params.storepass().isEmpty()) {
+                throw new IllegalArgumentException("storepass must specify the >API key< for CUSTOMPROVIDER");
+            }
+        }
+
+        @Override
+        Provider getProvider(KeyStoreBuilder params) {
+            String endpoint = params.keystore();
+            String apiKey = params.storepass();
+
+            return new SigningServiceJcaProvider(new CustomProviderService(endpoint, apiKey));
+        }
+
+        @Override
+        boolean reuseKeyStorePassword() { //mock
+            return false;
         }
     },
 
@@ -544,6 +580,7 @@ public enum KeyStoreType {
             return new SigningServiceJcaProvider(new GaraSignSigningService(params.keystore(), credentials));
         }
     };
+
 
 
     /** Tells if the keystore is contained in a local file */
