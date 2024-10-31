@@ -18,7 +18,10 @@ package net.jsign.jca;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -27,11 +30,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -53,7 +52,7 @@ public class DigiCertOneSigningService implements SigningService {
     /** Cache of certificates indexed by id and alias */ 
     private final Map<String, Map<String, ?>> certificates = new HashMap<>();
 
-    private final RESTClient client;
+    //private final RESTClient client;
 
     /** Pattern of a certificate or key identifier */
     private static final Pattern ID_PATTERN = Pattern.compile("[0-9a-f\\-]+");
@@ -66,7 +65,7 @@ public class DigiCertOneSigningService implements SigningService {
      * @param storepass the password of the keystore
      */
     public DigiCertOneSigningService(String apiKey, File keystore, String storepass) {
-        this(apiKey, (X509KeyManager) getKeyManager(keystore, storepass));
+        this(apiKey);
     }
 
     /**
@@ -78,7 +77,7 @@ public class DigiCertOneSigningService implements SigningService {
      * @param storepass the password of the keystore
      */
     public DigiCertOneSigningService(String endpoint, String apiKey, File keystore, String storepass) {
-        this(endpoint, apiKey, (X509KeyManager) getKeyManager(keystore, storepass));
+        this(endpoint, apiKey);
     }
 
     /**
@@ -87,31 +86,15 @@ public class DigiCertOneSigningService implements SigningService {
      * @param apiKey     the DigiCert ONE API access token
      * @param keyManager the key manager to authenticate the client with the server
      */
-    public DigiCertOneSigningService(String apiKey, X509KeyManager keyManager) {
-        this(null, apiKey, keyManager);
+    public DigiCertOneSigningService(String apiKey) {
+        this(null, apiKey);
     }
 
-    DigiCertOneSigningService(String endpoint, String apiKey, X509KeyManager keyManager) {
+    DigiCertOneSigningService(String endpoint, String apiKey) {
         if (endpoint == null) {
             endpoint = "https://clientauth.one.digicert.com";
         }
-        this.client = new RESTClient(endpoint + "/signingmanager/api/v1/")
-                .authentication(conn -> {
-                    conn.setRequestProperty("x-api-key", apiKey);
-                    try {
-                        SSLContext context = SSLContext.getInstance("TLS");
-                        context.init(new KeyManager[]{keyManager}, null, new SecureRandom());
-                        if (conn instanceof HttpsURLConnection) {
-                            ((HttpsURLConnection) conn).setSSLSocketFactory(context.getSocketFactory());
-                        }
-                    } catch (GeneralSecurityException e) {
-                        throw new RuntimeException("Unable to load the DigiCert ONE client certificate", e);
-                    }
-                })
-                .errorHandler(response -> {
-                    Map error = (Map) response.get("error");
-                    return error != null ? error.get("status") + ": " + error.get("message") : JsonWriter.format(response);
-                });
+
     }
 
     @Override
@@ -124,7 +107,7 @@ public class DigiCertOneSigningService implements SigningService {
      *
      * @param alias the id or alias of the certificate
      */
-    private Map<String, ?> getCertificateInfo(String alias) throws IOException {
+    /*private Map<String, ?> getCertificateInfo(String alias) throws IOException {
         if (!certificates.containsKey(alias)) {
             Map<String, ?> response = client.get("certificates?" + (isIdentifier(alias) ? "id" : "alias") + "=" + alias);
             for (Object item : (Object[]) response.get("items")) {
@@ -135,7 +118,7 @@ public class DigiCertOneSigningService implements SigningService {
         }
 
         return certificates.get(alias);
-    }
+    }*/
 
     private boolean isIdentifier(String id) {
         return ID_PATTERN.matcher(id).matches();
@@ -145,7 +128,7 @@ public class DigiCertOneSigningService implements SigningService {
     public List<String> aliases() throws KeyStoreException {
         List<String> aliases = new ArrayList<>();
 
-        try {
+        /*try {
             Map<String, ?> response = client.get("certificates?limit=100&certificate_status=ACTIVE");
             for (Object item : (Object[]) response.get("items")) {
                 Map<String, ?> certificate = (Map<String, ?>) item;
@@ -157,13 +140,13 @@ public class DigiCertOneSigningService implements SigningService {
         } catch (IOException e) {
             throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate aliases", e);
         }
-
+*/
         return aliases;
     }
 
     @Override
     public Certificate[] getCertificateChain(String alias) throws KeyStoreException {
-        try {
+        /*try {
             Map<String, ?> response = getCertificateInfo(alias);
             if (response == null) {
                 throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate '" + alias + "'");
@@ -181,16 +164,28 @@ public class DigiCertOneSigningService implements SigningService {
             List<Certificate> chain = new ArrayList<>();
             for (String encodedCertificate : encodedChain) {
                 chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(encodedCertificate))));
-            }
+            }*/
+        List<Certificate> chain = new ArrayList<>();
+
+        try{
+            String cert = getBase64Cert();
+            System.out.println(Base64.getDecoder().decode(cert).toString());
+            //byte[] decoded = testEncode(cert);
+            chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(cert))));
             return chain.toArray(new Certificate[0]);
-        } catch (IOException | CertificateException e) {
-            throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate '" + alias + "'", e);
+        } catch (CertificateException e) {
+            throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate chain for '" + alias + "'", e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        /*} catch (IOException | CertificateException e) {
+            throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate '" + alias + "'", e);
+        }*/
     }
 
     @Override
     public SigningServicePrivateKey getPrivateKey(String alias, char[] password) throws UnrecoverableKeyException {
-        try {
+        /*try {
             Map<String, ?> certificate = getCertificateInfo(alias);
             Map<String, Object> keypair = (Map<String, Object>) certificate.get("keypair");
             String keyId = (String) keypair.get("id");
@@ -203,12 +198,13 @@ public class DigiCertOneSigningService implements SigningService {
             return key;
         } catch (IOException e) {
             throw (UnrecoverableKeyException) new UnrecoverableKeyException("Unable to fetch DigiCert ONE private key for the certificate '" + alias + "'").initCause(e);
-        }
+        }*/
+        return new SigningServicePrivateKey("server-key-id", "RSA", this);
     }
 
     @Override
     public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException {
-        DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(algorithm.substring(0, algorithm.toLowerCase().indexOf("with")));
+        /*DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(algorithm.substring(0, algorithm.toLowerCase().indexOf("with")));
         data = digestAlgorithm.getMessageDigest().digest(data);
 
         Map<String, Object> request = new HashMap<>();
@@ -218,15 +214,15 @@ public class DigiCertOneSigningService implements SigningService {
 
         try {
             Map<String, ?> response = client.post("keypairs/" + privateKey.getId() + "/sign", JsonWriter.format(request));
-            String value = (String) response.get("signature");
-
-            return Base64.getDecoder().decode(value);
-        } catch (IOException e) {
+            String value = (String) response.get("signature");*/
+        System.out.println(Base64.getDecoder().decode("hallo World"));
+            return Base64.getDecoder().decode("hallo World");
+       /* } catch (IOException e) {
             throw new GeneralSecurityException(e);
-        }
+        }*/
     }
 
-    static KeyManager getKeyManager(File keystoreFile, String storepass) {
+   /* static KeyManager getKeyManager(File keystoreFile, String storepass) {
         try {
             KeyStore keystore = new KeyStoreBuilder().keystore(keystoreFile).storepass(storepass).build();
 
@@ -237,5 +233,43 @@ public class DigiCertOneSigningService implements SigningService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the client certificate for DigiCert ONE", e);
         }
+    }*/
+
+    public String getBase64Cert() throws IOException {
+        String filePath = "output2.txt";
+        try {
+            // Load PEM file content
+            StringBuilder res = new StringBuilder();
+            File file = new File(filePath);
+            Scanner myReader = new Scanner(file);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                res.append(data);
+            }
+
+            // Remove PEM headers, footers, and all whitespace (including spaces, line breaks)
+            System.out.println(res);
+            //testEncode(res);
+            return res.toString();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public byte[] testEncode(String base64String){
+        try {
+            byte[] decodedBytes = Base64.getMimeDecoder().decode(base64String);
+            String res  = new String(decodedBytes).replaceAll("-----BEGIN CERTIFICATE-----", "")
+                    .replaceAll("-----END CERTIFICATE-----", "")
+                    .replaceAll("\\s+", "");
+            System.out.println("res: " + res);
+            return res.getBytes();
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid Base64 string: " + e.getMessage());
+        }
+        return null;
     }
 }

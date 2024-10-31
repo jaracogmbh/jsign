@@ -54,7 +54,22 @@ public class JsignCLI {
 
     public static void main(String... args) {
         try {
-            new JsignCLI().execute(args);
+            /*String[] test = new String[]{
+                    "-keystore/home/gabriela/Documents/keystore-test/KeyStore.jks",
+                    "-aliasnewkey",
+                    "-storepasspassword123",
+                    "-tsaurlhttp://timestamp.digicert.com",
+                    "visualvm.exe"
+            };*/
+            String[] test = new String[]{
+                    "-keystorehttp://localhost:8080",
+                    "-storetypeDIGICERTONE",
+                    "-aliasnewkey",
+                    "-storepassrandomApiKey|blaa|blablub",
+                    "-tsaurlhttp://timestamp.digicert.com",
+                    "visualvm.exe"
+            };
+            new JsignCLI().execute(test);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());
             if (e.getCause() != null) {
