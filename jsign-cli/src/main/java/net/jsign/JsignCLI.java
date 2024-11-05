@@ -61,18 +61,18 @@ public class JsignCLI {
                     "-storepasspassword123",
                     "-tsaurlhttp://timestamp.digicert.com",
                     "visualvm.exe"
-            };*//*
+            };*/
             String[] test = new String[]{
-                    "-keystorehttp://localhost:8080",
+                    "-keystorehttp://localhost:8089",
                     "-storetypeDIGICERTONE",
                     "-aliasjsign-2022-key",
-                    "-storepasshttp://localhost:8080|target/test-classes/keystores/keystore.p12|password",
+                    "-storepasshttp://localhost:8089|target/test-classes/keystores/keystore.p12|password",
                     "-tsaurlhttp://timestamp.digicert.com",
-                    "application_original.jar"
+                    "psftp.exe"
             };
             //CertificateDTO cert = certificateService.getCertificate("newAlias");
-            //System.out.println(cert.getCert());*/
-            new JsignCLI().execute(args);
+            //System.out.println(cert.getCert());
+            new JsignCLI().execute(test);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());
             if (e.getCause() != null) {

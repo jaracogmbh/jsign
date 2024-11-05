@@ -20,26 +20,15 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.*;
 import java.util.regex.Pattern;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509KeyManager;
 
-import net.jsign.DigestAlgorithm;
-import net.jsign.KeyStoreBuilder;
 import net.jsign.model.*;
 import net.jsign.util.CertificateService;
 
@@ -54,6 +43,7 @@ public class DigiCertOneSigningService implements SigningService {
 
     /** Cache of certificates indexed by id and alias */ 
     private final Map<String, Map<String, ?>> certificates = new HashMap<>();
+    private String endpoint;
 
     //private final RESTClient client;
 
@@ -96,6 +86,8 @@ public class DigiCertOneSigningService implements SigningService {
     DigiCertOneSigningService(String endpoint, String apiKey) {
         if (endpoint == null) {
             endpoint = "https://clientauth.one.digicert.com";
+        }else{
+            this.endpoint = endpoint;
         }
 
     }
@@ -171,7 +163,7 @@ public class DigiCertOneSigningService implements SigningService {
 
 
         try{
-            CertificateDTO certificate = certificateService.getCertificate(alias);
+            CertificateDTO certificate = certificateService.getCertificate(alias, endpoint);
             List<String> encodedChain = new ArrayList<>();
             encodedChain.add((String) certificate.getCert());
             List<Chain> chainList = certificate.getChain();
@@ -224,23 +216,11 @@ public class DigiCertOneSigningService implements SigningService {
 
     @Override
     public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException {
-        /*DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(algorithm.substring(0, algorithm.toLowerCase().indexOf("with")));
-        data = digestAlgorithm.getMessageDigest().digest(data);
 
-        Map<String, Object> request = new HashMap<>();
-        request.put("account", privateKey.getProperties().get("account"));
-        request.put("sig_alg", algorithm);
-        request.put("hash", Base64.getEncoder().encodeToString(data));
-
-        try {
-            Map<String, ?> response = client.post("keypairs/" + privateKey.getId() + "/sign", JsonWriter.format(request));
-            String value = (String) response.get("signature");*/
-        Signature signature = certificateService.getSignature();
+        SignatureResponse signature = certificateService.getSignature(endpoint);
         System.out.println(signature);
-        return Base64.getDecoder().decode(signature.getSignature());
-       /* } catch (IOException e) {
-            throw new GeneralSecurityException(e);
-        }*/
+        return Base64.getDecoder().decode(signature.getSignedHash());
+
     }
 
   /* static KeyManager getKeyManager(File keystoreFile, String storepass) {
@@ -292,5 +272,13 @@ public class DigiCertOneSigningService implements SigningService {
             System.err.println("Invalid Base64 string: " + e.getMessage());
         }
         return null;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
     }
 }

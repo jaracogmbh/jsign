@@ -379,22 +379,13 @@ public enum KeyStoreType {
             if (params.storepass() == null || params.storepass().split("\\|").length != 3) {
                 throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the DigiCert ONE API key and the client certificate: <apikey>|<keystore>|<password>");
             }
-            /*if (params.keystore() == null || params.keystore().isEmpty()) {
-                throw new IllegalArgumentException("keystore must specify the >API endpoint URL< for CUSTOMPROVIDER");
-            }
-            if (params.storepass() == null || params.storepass().isEmpty()) {
-                throw new IllegalArgumentException("storepass must specify the >API key< for CUSTOMPROVIDER");
-            }*/
+
         }
 
         @Override
         Provider getProvider(KeyStoreBuilder params) {
             String[] elements = params.storepass().split("\\|");
             return new SigningServiceJcaProvider(new DigiCertOneSigningService(params.keystore(), elements[0], params.createFile(elements[1]), elements[2]));
-            /*String endpoint = params.keystore();
-            String apiKey = params.storepass();
-
-            return new SigningServiceJcaProvider(new CustomProviderService(endpoint, apiKey));*/
         }
     },
 
