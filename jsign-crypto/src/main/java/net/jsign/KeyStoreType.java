@@ -125,10 +125,10 @@ public enum KeyStoreType {
         @Override
         void validate(KeyStoreBuilder params) {
             if (params.keystore() == null || params.keystore().isEmpty()) {
-                throw new IllegalArgumentException("keystore must specify the >API endpoint URL< for CUSTOMPROVIDER");
+                throw new IllegalArgumentException("keystore must specify the API endpoint URL for CUSTOMPROVIDER");
             }
             if (params.storepass() == null || params.storepass().isEmpty()) {
-                throw new IllegalArgumentException("storepass must specify the >API key< for CUSTOMPROVIDER");
+                throw new IllegalArgumentException("storepass must specify the API key for CUSTOMPROVIDER");
             }
         }
 
@@ -141,8 +141,32 @@ public enum KeyStoreType {
         }
 
         @Override
-        boolean reuseKeyStorePassword() { //mock
+        boolean reuseKeyStorePassword() {
             return false;
+        }
+
+        @Override
+        KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
+            try {
+                System.out.println("Initializing KeyStore for CUSTOMPROVIDER");
+                System.out.println("Endpoint: " + params.keystore());
+                System.out.println("API Key: " + (params.storepass() != null ? "Provided" : "Not Provided"));
+
+                KeyStore ks = KeyStore.getInstance("SigningService", provider);
+
+                System.out.println("Created KeyStore instance with provider: " + provider.getName());
+
+                ks.load(null, null);  // no input stream, as expected for this setup
+
+                System.out.println("KeyStore loaded successfully for CUSTOMPROVIDER");
+
+                return ks;
+            } catch (Exception e) {
+                System.err.println("Exception occurred while loading KeyStore:");
+                e.printStackTrace();
+
+                throw new KeyStoreException("Unable to load the CUSTOMPROVIDER keystore", e);
+            }
         }
     },
 
