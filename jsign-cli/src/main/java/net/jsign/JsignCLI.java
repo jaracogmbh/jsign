@@ -52,6 +52,7 @@ import static org.apache.commons.io.ByteOrderMark.*;
  */
 public class JsignCLI {
 
+
     public static void main(String... args) {
         try {
             /*String[] test = new String[]{
@@ -60,16 +61,18 @@ public class JsignCLI {
                     "-storepasspassword123",
                     "-tsaurlhttp://timestamp.digicert.com",
                     "visualvm.exe"
-            };*/
+            };*//*
             String[] test = new String[]{
                     "-keystorehttp://localhost:8080",
                     "-storetypeDIGICERTONE",
-                    "-aliasnewkey",
-                    "-storepassrandomApiKey|blaa|blablub",
+                    "-aliasjsign-2022-key",
+                    "-storepasshttp://localhost:8080|target/test-classes/keystores/keystore.p12|password",
                     "-tsaurlhttp://timestamp.digicert.com",
-                    "visualvm.exe"
+                    "application_original.jar"
             };
-            new JsignCLI().execute(test);
+            //CertificateDTO cert = certificateService.getCertificate("newAlias");
+            //System.out.println(cert.getCert());*/
+            new JsignCLI().execute(args);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());
             if (e.getCause() != null) {

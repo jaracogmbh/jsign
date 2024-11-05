@@ -40,6 +40,8 @@ import javax.net.ssl.X509KeyManager;
 
 import net.jsign.DigestAlgorithm;
 import net.jsign.KeyStoreBuilder;
+import net.jsign.model.*;
+import net.jsign.util.CertificateService;
 
 /**
  * DigiCert ONE signing service.
@@ -48,6 +50,7 @@ import net.jsign.KeyStoreBuilder;
  * @see <a href="https://one.digicert.com/signingmanager/swagger-ui/index.html?configUrl=/signingmanager/v3/api-docs/swagger-config">Secure Software Manager REST API</a>
  */
 public class DigiCertOneSigningService implements SigningService {
+    private CertificateService certificateService = new CertificateService();
 
     /** Cache of certificates indexed by id and alias */ 
     private final Map<String, Map<String, ?>> certificates = new HashMap<>();
@@ -165,18 +168,25 @@ public class DigiCertOneSigningService implements SigningService {
             for (String encodedCertificate : encodedChain) {
                 chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(encodedCertificate))));
             }*/
-        List<Certificate> chain = new ArrayList<>();
+
 
         try{
-            String cert = getBase64Cert();
-            System.out.println(Base64.getDecoder().decode(cert).toString());
+            CertificateDTO certificate = certificateService.getCertificate(alias);
+            List<String> encodedChain = new ArrayList<>();
+            encodedChain.add((String) certificate.getCert());
+            List<Chain> chainList = certificate.getChain();
+            for(Chain c : chainList){
+                encodedChain.add(c.getBlob());
+            }
+            List<Certificate> chain = new ArrayList<>();
+            for (String encodedCertificate : encodedChain) {
+                chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(encodedCertificate))));
+            }
             //byte[] decoded = testEncode(cert);
-            chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(cert))));
+            //chain.add(CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(cert))));
             return chain.toArray(new Certificate[0]);
         } catch (CertificateException e) {
             throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate chain for '" + alias + "'", e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         /*} catch (IOException | CertificateException e) {
             throw new KeyStoreException("Unable to retrieve DigiCert ONE certificate '" + alias + "'", e);
@@ -199,7 +209,17 @@ public class DigiCertOneSigningService implements SigningService {
         } catch (IOException e) {
             throw (UnrecoverableKeyException) new UnrecoverableKeyException("Unable to fetch DigiCert ONE private key for the certificate '" + alias + "'").initCause(e);
         }*/
-        return new SigningServicePrivateKey("server-key-id", "RSA", this);
+        try{
+            /*CertificateDTO certificate = certificateService.getCertificate(alias);
+            String keyAlgorithm = certificate.getKeyAlgorithm();
+            KeyPair keyPair = certificate.getKeyPair();
+            String keyId = keyPair.getId();
+            SigningServicePrivateKey key = new SigningServicePrivateKey(keyId, keyAlgorithm, this);
+            key.getProperties().put("account", certificate.getAccount());*/
+            return new SigningServicePrivateKey("egal", "RSA", this);
+        } catch (Exception e) {
+            throw (UnrecoverableKeyException) new UnrecoverableKeyException("Unable to fetch DigiCert ONE private key for the certificate '" + alias + "'").initCause(e);
+        }
     }
 
     @Override
@@ -215,14 +235,15 @@ public class DigiCertOneSigningService implements SigningService {
         try {
             Map<String, ?> response = client.post("keypairs/" + privateKey.getId() + "/sign", JsonWriter.format(request));
             String value = (String) response.get("signature");*/
-        System.out.println(Base64.getDecoder().decode("hallo World"));
-            return Base64.getDecoder().decode("hallo World");
+        Signature signature = certificateService.getSignature();
+        System.out.println(signature);
+        return Base64.getDecoder().decode(signature.getSignature());
        /* } catch (IOException e) {
             throw new GeneralSecurityException(e);
         }*/
     }
 
-   /* static KeyManager getKeyManager(File keystoreFile, String storepass) {
+  /* static KeyManager getKeyManager(File keystoreFile, String storepass) {
         try {
             KeyStore keystore = new KeyStoreBuilder().keystore(keystoreFile).storepass(storepass).build();
 
