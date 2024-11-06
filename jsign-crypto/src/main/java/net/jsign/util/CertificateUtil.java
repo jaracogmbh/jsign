@@ -2,23 +2,10 @@ package net.jsign.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jsign.model.CertificateDTO;
-import net.jsign.model.CertificateList;
 import net.jsign.model.SignatureResponse;
 
 public class CertificateUtil {
 
-    public CertificateList getCertificates(String jsonString) {
-       try{
-           // Initialize Jackson ObjectMapper
-           ObjectMapper objectMapper = new ObjectMapper();
-           //Convert JSON String to Java Object
-           CertificateList certificateList = objectMapper.readValue(jsonString, CertificateList.class);
-           return certificateList;
-       }catch (Exception e){
-           e.printStackTrace();
-       }
-        return null;
-    }
 
     public CertificateDTO getCertificate(String jsonString) {
         try{

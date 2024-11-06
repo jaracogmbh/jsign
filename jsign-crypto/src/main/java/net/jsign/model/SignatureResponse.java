@@ -4,18 +4,20 @@ public class SignatureResponse {
     Long signTime;
     String signedHash;
     String validUntil;
-    String certifacteId;
+    String certificateId;
+    String signCertificate;
     String signReturnCode;
     String errorMessage;
 
     public SignatureResponse() {
     }
 
-    public SignatureResponse(Long signTime, String signedHash, String validUntil, String certifacteId, String signReturnCode, String errorMessage) {
+    public SignatureResponse(Long signTime, String signedHash, String validUntil, String certifacteId, String signCertificate, String signReturnCode, String errorMessage) {
         this.signTime = signTime;
         this.signedHash = signedHash;
         this.validUntil = validUntil;
-        this.certifacteId = certifacteId;
+        this.certificateId = certifacteId;
+        this.signCertificate = signCertificate;
         this.signReturnCode = signReturnCode;
         this.errorMessage = errorMessage;
     }
@@ -44,12 +46,12 @@ public class SignatureResponse {
         this.validUntil = validUntil;
     }
 
-    public String getCertifacteId() {
-        return certifacteId;
+    public String getCertificateId() {
+        return certificateId;
     }
 
-    public void setCertifacteId(String certifacteId) {
-        this.certifacteId = certifacteId;
+    public void setCertificateId(String certificateId) {
+        this.certificateId = certificateId;
     }
 
     public String getSignReturnCode() {
@@ -66,5 +68,13 @@ public class SignatureResponse {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getSignCertificate() {
+        return signCertificate;
+    }
+
+    public void setSignCertificate(String signCertificate) {
+        this.signCertificate = signCertificate;
     }
 }

@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.smartcardio.CardException;
 
+import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.jca.AmazonCredentials;
 import net.jsign.jca.AmazonSigningService;
 import net.jsign.jca.AzureKeyVaultSigningService;
@@ -376,16 +377,17 @@ public enum KeyStoreType {
     DIGICERTONE(false, true, false) {
         @Override
         void validate(KeyStoreBuilder params) {
-            if (params.storepass() == null || params.storepass().split("\\|").length != 3) {
+            if (params.storepass() == null || params.storepass().split("\\|").length != 7) {
                 throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the DigiCert ONE API key and the client certificate: <apikey>|<keystore>|<password>");
             }
 
         }
 
         @Override
-        Provider getProvider(KeyStoreBuilder params) {
+        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
             String[] elements = params.storepass().split("\\|");
-            return new SigningServiceJcaProvider(new DigiCertOneSigningService(params.keystore(), elements[0], params.createFile(elements[1]), elements[2]));
+
+            return new SigningServiceJcaProvider(new DigiCertOneSigningService(params.keystore(), elements[0], elements[1], Integer.parseInt(elements[2]), Boolean.valueOf(elements[3]), elements[4], Integer.parseInt(elements[5]), elements[6], params.keypass()));
         }
     },
 
@@ -612,7 +614,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) {
+    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
         return null;
     }
 

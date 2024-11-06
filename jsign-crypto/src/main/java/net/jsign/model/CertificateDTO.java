@@ -7,20 +7,15 @@ public class CertificateDTO {
     String id;
     String cert;
     List<Chain> chain;
-    String keyAlgorithm;
-    KeyPair keyPair;
-    Account account;
+
 
     public CertificateDTO() {
     }
 
-    public CertificateDTO(String id, String cert, List<Chain> chain, String keyAlgorithm, KeyPair keyPair, Account account) {
+    public CertificateDTO(String id, String cert, List<Chain> chain) {
         this.id = id;
         this.cert = cert;
         this.chain = chain;
-        this.keyAlgorithm = keyAlgorithm;
-        this.keyPair = keyPair;
-        this.account = account;
     }
 
     public String getId() {
@@ -47,27 +42,4 @@ public class CertificateDTO {
         this.chain = chain;
     }
 
-    public String getKeyAlgorithm() {
-        return keyAlgorithm;
-    }
-
-    public void setKeyAlgorithm(String keyAlgorithm) {
-        this.keyAlgorithm = keyAlgorithm;
-    }
-
-    public KeyPair getKeyPair() {
-        return keyPair;
-    }
-
-    public void setKeyPair(KeyPair keyPair) {
-        this.keyPair = keyPair;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
 }

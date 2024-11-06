@@ -52,7 +52,6 @@ import static org.apache.commons.io.ByteOrderMark.*;
  */
 public class JsignCLI {
 
-
     public static void main(String... args) {
         try {
             /*String[] test = new String[]{
@@ -66,7 +65,8 @@ public class JsignCLI {
                     "-keystorehttp://localhost:8089",
                     "-storetypeDIGICERTONE",
                     "-aliasjsign-2022-key",
-                    "-storepasshttp://localhost:8089|target/test-classes/keystores/keystore.p12|password",
+                    "-keypasspassword123",
+                    "-storepassSHA256WithRSA|SHA-256|0|true|itsGroup|1234|user",
                     "-tsaurlhttp://timestamp.digicert.com",
                     "psftp.exe"
             };
