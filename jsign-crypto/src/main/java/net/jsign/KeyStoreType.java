@@ -115,18 +115,18 @@ public enum KeyStoreType {
     /**
      * Keystore type uses a custom signing service that communicates with an API endpoint.
      * The `keystore` parameter specifies the API endpoint URL.
-     * The `storepass` parameter specifies the API key for authentication.
+     * The `storepass` parameter specifies the API parameters for authentication and the signing.
      *
      * Usage:
      *   --storetype CUSTOMPROVIDER
      *   --keystore <API endpoint URL>
-     *   --storepass <API key>
+     *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
      */
     CUSTOMPROVIDER(false, false, false) {
         @Override
         void validate(KeyStoreBuilder params) {
             if (params.storepass() == null || params.storepass().split("\\|").length != 8) {
-                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the DigiCert ONE API key and the client certificate: <apikey>|<keystore>|<password>");
+                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
             }
         }
 
