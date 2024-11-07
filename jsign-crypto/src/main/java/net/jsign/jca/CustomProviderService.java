@@ -22,19 +22,34 @@ import java.util.logging.Logger;
 
 import net.jsign.DigestAlgorithm;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import net.jsign.exception.FailedCertificateExtractionException;
+import net.jsign.exception.FailedSignatureExtractionException;
+import net.jsign.exception.NoEndpointSpecifiedException;
+import net.jsign.exception.SignRequestFailedException;
+import net.jsign.model.CertificateDTO;
+import net.jsign.model.Chain;
+import net.jsign.model.SignatureResponse;
+import net.jsign.util.CertificateService;
 
 /**
  * Custom signing service implementation for a mock API.
  */
 public class CustomProviderService implements SigningService {
 
-    private static final Logger logger = Logger.getLogger(CustomProviderService.class.getName());
-    private final String endpoint;
-    private final String apiKey;
+    private CertificateService certificateService = new CertificateService();
+    private final Logger logger = Logger.getLogger(DigiCertOneSigningService.class.getName());
+
     private final String alias = "default";
-    private final Gson gson = new Gson();
+    private final List<Certificate> certificates = new ArrayList<>();
+    private String endpoint;
+    String signAlgorithm;
+    String mgfAlgorithm;
+    int saltLength;
+    boolean nonDecorateSignature;
+    String group;
+    int serviceId;
+    String user;
+    String auth;
 
     /**
      * Constructor for CustomProviderService.
@@ -42,13 +57,38 @@ public class CustomProviderService implements SigningService {
      * @param endpoint The API endpoint URL
      * @param apiKey   The x-api-key for authentication
      */
-    public CustomProviderService(String endpoint, String apiKey) {
+    public CustomProviderService(String endpoint,
+                                 String signAlgorithm,
+                                 String mgfAlgorithm,
+                                 int saltLength,
+                                 boolean nonDecorateSignature,
+                                 String group,
+                                 int serviceId,
+                                 String user,
+                                 String auth) throws NoEndpointSpecifiedException {
         if (endpoint == null) {
-            endpoint = "http://localhost:8080";
+            throw new NoEndpointSpecifiedException("No endpoint specified for the signing service service");
+        }else{
+            logger.info("Initializing CustomProviderService with endpoint: " + endpoint);
+            logger.info("Setting endpoint to: " + endpoint);
+            this.endpoint = endpoint;
         }
-        logger.info("Initializing CustomProviderService with endpoint: " + endpoint);
-        this.endpoint = endpoint;
-        this.apiKey = apiKey;
+        logger.info("Setting sign algorithm to: " + signAlgorithm);
+        this.signAlgorithm = signAlgorithm;
+        logger.info("Setting mask generation function to: " + mgfAlgorithm);
+        this.mgfAlgorithm = mgfAlgorithm;
+        logger.info("Setting salt length to: " + saltLength);
+        this.saltLength = saltLength;
+        logger.info("Setting non decorate signature to: " + nonDecorateSignature);
+        this.nonDecorateSignature = nonDecorateSignature;
+        logger.info("Setting group to: " + group);
+        this.group = group;
+        logger.info("Setting service id to: " + serviceId);
+        this.serviceId = serviceId;
+        logger.info("Setting user to: " + user);
+        this.user = user;
+        logger.info("Setting auth to: " + auth);
+        this.auth = auth;
     }
 
     @Override
@@ -64,62 +104,56 @@ public class CustomProviderService implements SigningService {
 
     @Override
     public Certificate[] getCertificateChain(String alias) throws KeyStoreException {
-        try {
-            logger.info("Requesting certificate chain for alias: " + alias);
-            Map<String, Object> response = httpGet("/getCertificateChain");
-            logger.info("Received certificate chain response: " + response);
-
-            List<String> encodedChain = (List<String>) response.get("certChain");
+        logger.info("Getting certificate chain from server");
+        try{
+            CertificateDTO certificate = certificateService.getCertificate(alias, endpoint, auth);
+            List<String> encodedChain = new ArrayList<>();
+            encodedChain.add((String) certificate.getCert());
+            List<Chain> chainList = certificate.getChain();
+            for(Chain c : chainList){
+                encodedChain.add(c.getBlob());
+            }
             List<Certificate> chain = new ArrayList<>();
-            for (String encodedCert : encodedChain) {
-                Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(
-                        new ByteArrayInputStream(Base64.getDecoder().decode(encodedCert)));
+            for (String encodedCertificate : encodedChain) {
+                Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(encodedCertificate)));
                 chain.add(cert);
-                logger.info("Decoded certificate added to chain: " + cert);
+                certificates.add(cert);
             }
             return chain.toArray(new Certificate[0]);
-
-        } catch (IOException | CertificateException e) {
-            logger.log(Level.SEVERE, "Failed to retrieve certificate chain", e);
-            throw new KeyStoreException("Unable to retrieve certificate chain for alias: " + alias, e);
+        } catch (CertificateException | FailedCertificateExtractionException e) {
+            logger.severe("Failed to get certificate chain from server for user with id: " + user);
+            throw new KeyStoreException("Failed to get certificate from server for user with id: " + user, e);
         }
     }
 
     @Override
     public SigningServicePrivateKey getPrivateKey(String alias, char[] password) throws UnrecoverableKeyException {
-        logger.info("Retrieving private key for alias: " + alias);
-        return new SigningServicePrivateKey("server-key-id", "RSA", this);
+        try{
+            logger.info("Skipping this method");
+            return new SigningServicePrivateKey("server-key-id", "RSA", this);
+        } catch (Exception e) {
+            throw (UnrecoverableKeyException) new UnrecoverableKeyException("Unable to fetch DigiCert ONE private key for the certificate '" + alias + "'").initCause(e);
+        }
     }
 
     @Override
-    public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException {
-        try {
-            logger.info("Signing data with algorithm: " + algorithm);
-
-            String digestAlgName = algorithm.substring(0, algorithm.indexOf("with"));
-            DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(digestAlgName);
-            byte[] hash = digestAlgorithm.getMessageDigest().digest(data);
-            String hashBase64 = Base64.getEncoder().encodeToString(hash);
-            logger.info("Computed hash (base64-encoded): " + hashBase64);
-
-            Map<String, Object> requestPayload = Map.of("fileSha", hashBase64);
-            logger.info("Sending sign request with payload: " + requestPayload);
-
-            Map<String, Object> response = httpPost("/sign", requestPayload);
-            logger.info("Received sign response: " + response);
-
-            String signatureBase64 = (String) response.get("signature");
-            return Base64.getDecoder().decode(signatureBase64);
-
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Failed to sign data with CustomProviderService", e);
-            throw new GeneralSecurityException("Failed to sign data with CustomProviderService", e);
+    public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException {
+        logger.info("Signing data with certificate");
+        SignatureResponse signature = certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, saltLength, nonDecorateSignature, group, serviceId, user, auth);
+        if(signature.getSignReturnCode() == "FAILED"){
+            logger.info("Failed to sign data with certificate!");
+            String errorMessage = signature.getErrorMessage();
+            logger.info("An error occured while creating the signature on the server site: " + signature.getErrorMessage());
+            throw new SignRequestFailedException(errorMessage);
+        }else{
+            logger.info("Successfully signed data with certificate");
+            return Base64.getDecoder().decode(signature.getSignedHash());
         }
     }
 
     // Helper methods for HTTP GET and POST requests
 
-    private Map<String, Object> httpGet(String path) throws IOException {
+    /*private Map<String, Object> httpGet(String path) throws IOException {
         URL url = new URL(endpoint + path);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -165,5 +199,5 @@ public class CustomProviderService implements SigningService {
         } else {
             throw new IOException("POST request failed with response code " + responseCode);
         }
-    }
+    }*/
 }

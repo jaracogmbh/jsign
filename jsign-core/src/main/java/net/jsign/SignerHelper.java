@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import net.jsign.exception.NoEndpointSpecifiedException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -322,12 +323,14 @@ class SignerHelper {
         }
     }
 
-    private AuthenticodeSigner build() throws SignerException {
+    private AuthenticodeSigner build() throws SignerException, NoEndpointSpecifiedException {
         KeyStore ks;
         try {
             ks = ksparams.build();
         } catch (KeyStoreException e) {
             throw new SignerException("Failed to load the keystore " + (ksparams.keystore() != null ? ksparams.keystore() : ""), e);
+        } catch (NoEndpointSpecifiedException e) {
+            throw new RuntimeException(e);
         }
         KeyStoreType storetype = ksparams.storetype();
         Provider provider = ksparams.provider();

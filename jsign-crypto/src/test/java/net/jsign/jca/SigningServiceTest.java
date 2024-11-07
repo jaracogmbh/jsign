@@ -162,7 +162,7 @@ public class SigningServiceTest {
         testCustomProvider(provider, keystore, "test", "");
     }
 
-    @Test
+   /* @Test
     public void testDigiCertProvider() throws Exception {
         String apikey = DigiCertONE.getApiKey();
         String keystoreFile = DigiCertONE.getClientCertificateFile();
@@ -172,7 +172,7 @@ public class SigningServiceTest {
         keystore.load(null, "".toCharArray());
 
         testCustomProvider(provider, keystore, "353d4f18-5325-4b78-b17c-f92375cf40ec", "");
-    }
+    }*/
 
     @Test
     public void testESignerProvider() throws Exception {

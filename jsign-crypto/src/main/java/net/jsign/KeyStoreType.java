@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.smartcardio.CardException;
 
+import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.jca.AmazonCredentials;
 import net.jsign.jca.AmazonSigningService;
 import net.jsign.jca.AzureKeyVaultSigningService;
@@ -124,20 +125,16 @@ public enum KeyStoreType {
     CUSTOMPROVIDER(false, false, false) {
         @Override
         void validate(KeyStoreBuilder params) {
-            if (params.keystore() == null || params.keystore().isEmpty()) {
-                throw new IllegalArgumentException("keystore must specify the API endpoint URL for CUSTOMPROVIDER");
-            }
-            if (params.storepass() == null || params.storepass().isEmpty()) {
-                throw new IllegalArgumentException("storepass must specify the API key for CUSTOMPROVIDER");
+            if (params.storepass() == null || params.storepass().split("\\|").length != 8) {
+                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the DigiCert ONE API key and the client certificate: <apikey>|<keystore>|<password>");
             }
         }
 
         @Override
-        Provider getProvider(KeyStoreBuilder params) {
-            String endpoint = params.keystore();
-            String apiKey = params.storepass();
+        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
+            String[] elements = params.storepass().split("\\|");
 
-            return new SigningServiceJcaProvider(new CustomProviderService(endpoint, apiKey));
+            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], Integer.parseInt(elements[2]), Boolean.valueOf(elements[3]), elements[4], Integer.parseInt(elements[5]), elements[6], elements[7]));
         }
 
         @Override
@@ -635,7 +632,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) {
+    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
         return null;
     }
 
