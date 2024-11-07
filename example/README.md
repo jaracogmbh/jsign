@@ -71,3 +71,11 @@ jarsigner \
 
 Dummy signing chain need to be implemented in the API response (`1 cert`,`2 cert`,`3 cert`). 
 To generate a dummy signing chain for testing, use the `generate_dummy_signing_chain.sh` script in the example directory and place it manually in the API.
+-------------------------------------------------------------------------------
+
+## Command Line Befehl für den Jarsigner (Beispiel)
+
+```
+jarsigner -J-cp -Jjsign-7.0-SNAPSHOT.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089" -keystore NONE -tsa http://timestamp.digicert.com  application_original.jar test
+
+```
