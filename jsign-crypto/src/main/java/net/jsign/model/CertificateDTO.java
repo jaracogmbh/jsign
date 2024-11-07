@@ -1,7 +1,12 @@
 package net.jsign.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
+
 import java.util.List;
+import java.util.Objects;
+
 
 public class CertificateDTO {
     String id;
@@ -42,4 +47,26 @@ public class CertificateDTO {
         this.chain = chain;
     }
 
+
+    @Override
+    public String toString() {
+        return "CertificateDTO{" +
+                "id='" + id + '\'' +
+                ", cert='" + cert + '\'' +
+                ", chain=" + chain +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CertificateDTO that = (CertificateDTO) o;
+        return Objects.equals(id, that.id) && Objects.equals(cert, that.cert) && Objects.equals(chain, that.chain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cert, chain);
+    }
 }

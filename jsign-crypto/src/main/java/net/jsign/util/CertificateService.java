@@ -102,15 +102,4 @@ public class CertificateService {
         return encoded;
     }
 
-    public String getPrivateKey(String filepath){
-        Path filePath = Paths.get(filepath);
-        try {
-            String content = Files.readString(filePath);
-            return content;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 }

@@ -87,7 +87,8 @@ public class DigiCertOneSigningService implements SigningService {
             boolean nonDecorateSignature,
             String group,
             int serviceId,
-            String user
+            String user,
+            String auth
     ) throws NoEndpointSpecifiedException {
         if (endpoint == null) {
             throw new NoEndpointSpecifiedException("No endpoint specified for the signing service service");
@@ -109,8 +110,8 @@ public class DigiCertOneSigningService implements SigningService {
         this.serviceId = serviceId;
         logger.info("Setting user to: " + user);
         this.user = user;
-        this.auth = certificateService.getPrivateKey("/home/gabriela/Documents/projects/jsign/privateKey.txt");
         logger.info("Setting auth to: " + auth);
+        this.auth = auth;
 
 
     }

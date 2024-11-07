@@ -1,15 +1,15 @@
 package net.jsign.model;
 
 public class Chain {
-    String cert_type;
+    String type;
     String blob;
 
-    public String getCert_type() {
-        return cert_type;
+    public String getType() {
+        return type;
     }
 
-    public void setCert_type(String cert_type) {
-        this.cert_type = cert_type;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getBlob() {

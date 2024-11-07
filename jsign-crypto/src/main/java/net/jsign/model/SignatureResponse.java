@@ -1,5 +1,7 @@
 package net.jsign.model;
 
+import java.util.Objects;
+
 public class SignatureResponse {
     Long signTime;
     String signedHash;
@@ -76,5 +78,31 @@ public class SignatureResponse {
 
     public void setSignCertificate(String signCertificate) {
         this.signCertificate = signCertificate;
+    }
+
+    @Override
+    public String toString() {
+        return "SignatureResponse{" +
+                "signTime=" + signTime +
+                ", signedHash='" + signedHash + '\'' +
+                ", validUntil='" + validUntil + '\'' +
+                ", certificateId='" + certificateId + '\'' +
+                ", signCertificate='" + signCertificate + '\'' +
+                ", signReturnCode='" + signReturnCode + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SignatureResponse that = (SignatureResponse) o;
+        return Objects.equals(signTime, that.signTime) && Objects.equals(signedHash, that.signedHash) && Objects.equals(validUntil, that.validUntil) && Objects.equals(certificateId, that.certificateId) && Objects.equals(signCertificate, that.signCertificate) && Objects.equals(signReturnCode, that.signReturnCode) && Objects.equals(errorMessage, that.errorMessage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(signTime, signedHash, validUntil, certificateId, signCertificate, signReturnCode, errorMessage);
     }
 }
