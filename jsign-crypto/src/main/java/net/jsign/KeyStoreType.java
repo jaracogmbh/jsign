@@ -387,7 +387,7 @@ public enum KeyStoreType {
         Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
             String[] elements = params.storepass().split("\\|");
 
-            return new SigningServiceJcaProvider(new DigiCertOneSigningService(params.keystore(), elements[0], elements[1], Integer.parseInt(elements[2]), Boolean.valueOf(elements[3]), elements[4], Integer.parseInt(elements[5]), elements[6], params.keypass()));
+            return new SigningServiceJcaProvider(new DigiCertOneSigningService(params.keystore(), elements[0], elements[1], Integer.parseInt(elements[2]), Boolean.valueOf(elements[3]), elements[4], Integer.parseInt(elements[5]), elements[6]));
         }
     },
 

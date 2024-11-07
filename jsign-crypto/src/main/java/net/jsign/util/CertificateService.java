@@ -5,10 +5,14 @@ import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.SignatureResponse;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.logging.Logger;
 
@@ -74,6 +78,7 @@ public class CertificateService {
            logger.info("Building the request");
             HttpClient client = HttpClient.newHttpClient();
             // Build the HttpRequest with the API endpoint URL
+            logger.info("Used endpoint: " + endpoint);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(endpoint + "/certificate"))
                     .header("Authorization", auth)
@@ -86,6 +91,7 @@ public class CertificateService {
             return certificate;
         } catch (Exception e) {
             logger.severe("Error getting certificate from the server: " + e.getMessage());
+            e.printStackTrace();
             throw new FailedCertificateExtractionException(e.getMessage());
         }
     }
@@ -94,6 +100,17 @@ public class CertificateService {
         String encoded = Base64.getEncoder().encodeToString(data);
         logger.info("converted to base64: " + encoded);
         return encoded;
+    }
+
+    public String getPrivateKey(String filepath){
+        Path filePath = Paths.get(filepath);
+        try {
+            String content = Files.readString(filePath);
+            return content;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
