@@ -1,8 +1,11 @@
 package net.jsign.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jsign.exception.FailedCertificateExtractionException;
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.model.CertificateDTO;
+import net.jsign.model.Chain;
 import net.jsign.model.SignatureResponse;
 
 import java.io.IOException;
@@ -13,12 +16,21 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class CertificateService {
     private CertificateUtil certificateUtil = new CertificateUtil();
     private final Logger logger = Logger.getLogger(CertificateService.class.getName());
+    private HttpClient client;
+
+
+
+    public CertificateService(HttpClient client) {
+        this.client = client;
+    }
 
     public SignatureResponse getSignature(
             String endpoint,
@@ -36,7 +48,6 @@ public class CertificateService {
         try {
             String fileHash = this.convertToBase64(data);
             logger.info("Getting signature for hash value: " + fileHash);
-            HttpClient client = HttpClient.newHttpClient();
 
             URI uri = URI.create(endpoint + "/sign");
             String jsonBody =
@@ -62,6 +73,11 @@ public class CertificateService {
 
             logger.info("Sending request to the server: " + request);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            int statusCode = response.statusCode();
+            if(statusCode != 200){
+                logger.severe("Error getting signature from the server: " + response.body());
+                throw new FailedSignatureExtractionException(response.body());
+            }
             SignatureResponse signature = certificateUtil.getSignature(response.body());
             return signature;
         } catch (Exception e) {
@@ -73,10 +89,8 @@ public class CertificateService {
 
     public CertificateDTO getCertificate(String alias, String endpoint, String auth) throws FailedCertificateExtractionException {
         logger.info("Getting certificate from the server");
-        int statusCode = 0;
         try {
            logger.info("Building the request");
-            HttpClient client = HttpClient.newHttpClient();
             // Build the HttpRequest with the API endpoint URL
             logger.info("Used endpoint: " + endpoint);
             HttpRequest request = HttpRequest.newBuilder()
@@ -85,9 +99,30 @@ public class CertificateService {
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode()!= 200){
+                logger.severe("Error getting certificate from the server: " + response.body());
+                throw new FailedSignatureExtractionException(response.body());
+            }
             logger.info("Extracting certificate from the response");
+            //ObjectMapper mapper = new ObjectMapper();
+
+            /*// Parse JSON string to JsonNode
+            JsonNode rootNode = mapper.readTree(response.body());
+
+            // Extract "cert" value
+            String cert = rootNode.path("cert").asText();
+            String id = rootNode.path("id").asText();
+            System.out.println("Cert: " + cert);
+
+            // Extract "blob" values from "chain" array
+            JsonNode chainArray = rootNode.path("chain");
+
+            List<Chain> chain = new ArrayList<>();
+            for (JsonNode node : chainArray) {
+                String blob = node.path("blob").asText();
+                chain.add(new Chain(blob));
+            }*/
             CertificateDTO certificate = certificateUtil.getCertificate(response.body());
-            statusCode = response.statusCode();
             return certificate;
         } catch (Exception e) {
             logger.severe("Error getting certificate from the server: " + e.getMessage());

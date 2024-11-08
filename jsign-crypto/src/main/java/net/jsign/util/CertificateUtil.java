@@ -14,6 +14,7 @@ public class CertificateUtil {
     public CertificateDTO getCertificate(String jsonString) throws JsonResponseIncorrectException {
         logger.info("Transforming JSON to CertificateDTO");
         try{
+            logger.info(jsonString);
             ObjectMapper objectMapper = new ObjectMapper();
             //Convert JSON String to Java Object
             CertificateDTO certificateDTO = objectMapper.readValue(jsonString, CertificateDTO.class);

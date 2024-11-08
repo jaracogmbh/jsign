@@ -4,6 +4,13 @@ public class Chain {
     String type;
     String blob;
 
+    public Chain() {
+    }
+
+    public Chain(String type, String blob) {
+        this.type = type;
+        this.blob = blob;
+    }
     public String getType() {
         return type;
     }
