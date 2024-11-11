@@ -104,24 +104,6 @@ public class CertificateService {
                 throw new FailedSignatureExtractionException(response.body());
             }
             logger.info("Extracting certificate from the response");
-            //ObjectMapper mapper = new ObjectMapper();
-
-            /*// Parse JSON string to JsonNode
-            JsonNode rootNode = mapper.readTree(response.body());
-
-            // Extract "cert" value
-            String cert = rootNode.path("cert").asText();
-            String id = rootNode.path("id").asText();
-            System.out.println("Cert: " + cert);
-
-            // Extract "blob" values from "chain" array
-            JsonNode chainArray = rootNode.path("chain");
-
-            List<Chain> chain = new ArrayList<>();
-            for (JsonNode node : chainArray) {
-                String blob = node.path("blob").asText();
-                chain.add(new Chain(blob));
-            }*/
             CertificateDTO certificate = certificateUtil.getCertificate(response.body());
             return certificate;
         } catch (Exception e) {

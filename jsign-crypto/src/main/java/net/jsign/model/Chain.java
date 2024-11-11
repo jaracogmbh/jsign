@@ -1,7 +1,7 @@
 package net.jsign.model;
 
 public class Chain {
-    String type;
+    Object type;
     String blob;
 
     public Chain() {
@@ -11,7 +11,7 @@ public class Chain {
         this.type = type;
         this.blob = blob;
     }
-    public String getType() {
+    public Object getType() {
         return type;
     }
 

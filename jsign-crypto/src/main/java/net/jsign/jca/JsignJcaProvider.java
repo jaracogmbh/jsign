@@ -37,6 +37,8 @@ import net.jsign.DigestAlgorithm;
 import net.jsign.KeyStoreBuilder;
 import net.jsign.KeyStoreType;
 import net.jsign.exception.NoEndpointSpecifiedException;
+import net.jsign.exception.NotABooleanValueException;
+import net.jsign.exception.NotCorrectIntegerValueException;
 
 /**
  * JCA provider using a Jsign keystore and compatible with jarsigner and apksigner.
@@ -106,7 +108,7 @@ public class JsignJcaProvider extends Provider {
             builder.certfile("");
         }
 
-        private KeyStore getKeyStore() throws KeyStoreException, NoEndpointSpecifiedException {
+        private KeyStore getKeyStore() throws KeyStoreException, NoEndpointSpecifiedException, NotCorrectIntegerValueException, NotABooleanValueException {
             if (keystore == null) {
                 keystore = builder.build();
             }
@@ -124,7 +126,8 @@ public class JsignJcaProvider extends Provider {
             } catch (UnrecoverableKeyException e) {
                 e.printStackTrace(); // because jarsigner swallows the root cause and hides what's going on
                 throw e;
-            } catch (KeyStoreException | NoSuchAlgorithmException | NoEndpointSpecifiedException e) {
+            } catch (KeyStoreException | NoSuchAlgorithmException | NoEndpointSpecifiedException |
+                     NotCorrectIntegerValueException | NotABooleanValueException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -133,7 +136,8 @@ public class JsignJcaProvider extends Provider {
         public Certificate[] engineGetCertificateChain(String alias) {
             try {
                 return getKeyStore().getCertificateChain(alias);
-            } catch (KeyStoreException | NoEndpointSpecifiedException e) {
+            } catch (KeyStoreException | NoEndpointSpecifiedException | NotCorrectIntegerValueException |
+                     NotABooleanValueException e) {
                 return null;
             }
         }
@@ -144,7 +148,7 @@ public class JsignJcaProvider extends Provider {
                 return getKeyStore().aliases();
             } catch (KeyStoreException e) {
                 throw new RuntimeException(e);
-            } catch (NoEndpointSpecifiedException e) {
+            } catch (NoEndpointSpecifiedException | NotCorrectIntegerValueException | NotABooleanValueException e) {
                 throw new RuntimeException(e);
             }
         }

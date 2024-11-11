@@ -35,6 +35,8 @@ import java.util.function.Function;
 import javax.smartcardio.CardException;
 
 import net.jsign.exception.NoEndpointSpecifiedException;
+import net.jsign.exception.NotABooleanValueException;
+import net.jsign.exception.NotCorrectIntegerValueException;
 import net.jsign.jca.AmazonCredentials;
 import net.jsign.jca.AmazonSigningService;
 import net.jsign.jca.AzureKeyVaultSigningService;
@@ -51,6 +53,7 @@ import net.jsign.jca.OracleCloudSigningService;
 import net.jsign.jca.PIVCardSigningService;
 import net.jsign.jca.SigningServiceJcaProvider;
 import net.jsign.jca.CustomProviderService;
+import net.jsign.util.ParameterChecker;
 
 /**
  * Type of a keystore.
@@ -123,18 +126,39 @@ public enum KeyStoreType {
      *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
      */
     CUSTOMPROVIDER(false, false, false) {
+        ParameterChecker checker = new ParameterChecker();
         @Override
         void validate(KeyStoreBuilder params) {
-            if (params.storepass() == null || params.storepass().split("\\|").length != 8) {
+
+            if (params.storepass() == null || params.storepass().split("\\|").length != 8 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
                 throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
             }
         }
 
         @Override
-        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
+        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotCorrectIntegerValueException {
             String[] elements = params.storepass().split("\\|");
-
-            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], Integer.parseInt(elements[2]), Boolean.valueOf(elements[3]), elements[4], Integer.parseInt(elements[5]), elements[6], elements[7]));
+            boolean nonDecorateSignature;
+            int saltLength;
+            int serviceId;
+            if(checker.checkIfBoolean(elements[3])) {
+                nonDecorateSignature = Boolean.parseBoolean(elements[3]);
+            }else {
+                throw new NotABooleanValueException("The value of non decorate signature is not a boolean value");
+            }
+            if(checker.checkIfInteger(elements[2])) {
+                saltLength = Integer.parseInt(elements[2]);
+            }
+            else{
+                throw new NotCorrectIntegerValueException("The value of salt length is not an integer value");
+            }
+            if(checker.checkIfInteger(elements[5])) {
+                serviceId = Integer.parseInt(elements[5]);
+            }
+            else{
+                throw new NotCorrectIntegerValueException("The value of service id is not an integer value");
+            }
+            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], serviceId, elements[6], elements[7]));
         }
 
         @Override
@@ -632,7 +656,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException {
+    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotCorrectIntegerValueException {
         return null;
     }
 

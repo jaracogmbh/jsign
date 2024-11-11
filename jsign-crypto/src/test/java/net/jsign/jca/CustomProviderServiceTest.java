@@ -1,32 +1,38 @@
 package net.jsign.jca;
 
 import net.jsign.exception.FailedCertificateExtractionException;
+import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.exception.NoEndpointSpecifiedException;
+import net.jsign.exception.SignRequestFailedException;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.Chain;
+import net.jsign.model.SignatureResponse;
 import net.jsign.util.CertificateService;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
+
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.Assert.assertThrows;
+
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 public class CustomProviderServiceTest {
 
-    CertificateService certificateService = Mockito.mock(CertificateService.class);
+
 
 
    @Test
-    public void testCustomProviderService() throws NoEndpointSpecifiedException, KeyStoreException, IOException, InterruptedException, FailedCertificateExtractionException {
+    public void getCertificateChainTest() throws NoEndpointSpecifiedException, KeyStoreException, IOException, InterruptedException, FailedCertificateExtractionException {
+       CertificateService certificateService = Mockito.mock(CertificateService.class);
        String endpoint = "http://localhost:8089";
        String signAlgorithm = "SHA256withRSA";
        String mgfAlgorithm = "MGF1";
@@ -57,8 +63,42 @@ public class CustomProviderServiceTest {
        assertEquals(2, certificates.length);
    }
 
+
+   @Test
+   public void getCertificateChainFailedTest() throws NoEndpointSpecifiedException, FailedCertificateExtractionException, KeyStoreException {
+       CertificateService certificateService = Mockito.mock(CertificateService.class);
+       String endpoint = "http://localhost:8089";
+       String signAlgorithm = "SHA256withRSA";
+       String mgfAlgorithm = "MGF1";
+       int saltLength = 32;
+       boolean nonDecorateSignature = false;
+       String group = "group";
+       int serviceId = 1;
+       String user = "user";
+       String auth = "password";
+
+       CustomProviderService underTest = new CustomProviderService(
+               certificateService,
+               endpoint,
+               signAlgorithm,
+               mgfAlgorithm,
+               saltLength,
+               nonDecorateSignature,
+               group,
+               serviceId,
+               user,
+               auth
+       );
+       when(certificateService.getCertificate("dummy", endpoint, auth)).thenThrow(new FailedCertificateExtractionException("error"));
+       Exception exception = assertThrows(KeyStoreException.class, () -> underTest.getCertificateChain("dummy"));
+       assertEquals("Failed to get certificate from server for user with id: user", exception.getMessage());
+       assertEquals("error", exception.getCause().getMessage());
+       assertEquals(FailedCertificateExtractionException.class, exception.getCause().getClass());
+   }
+
    @Test
    public void NoEndpointTest(){
+       CertificateService certificateService = Mockito.mock(CertificateService.class);
          String endpoint = null;
          String signAlgorithm = "SHA256withRSA";
          String mgfAlgorithm = "MGF1";
@@ -85,4 +125,53 @@ public class CustomProviderServiceTest {
               assertEquals("No endpoint specified for the signing service service", e.getMessage());
          }
    }
+
+   //@Test
+   public void signSuccessTest() throws NoEndpointSpecifiedException, FailedCertificateExtractionException, GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException {
+       CertificateService certificateService = Mockito.mock(CertificateService.class);
+       String endpoint = "http://localhost:8089";
+       String signAlgorithm = "SHA256withRSA";
+       String mgfAlgorithm = "MGF1";
+       int saltLength = 32;
+       boolean nonDecorateSignature = false;
+       String group = "group";
+       int serviceId = 1;
+       String user = "user";
+       String auth = "password";
+       byte[] data = "Das ist die Datei".getBytes();
+       SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
+
+       CustomProviderService underTest = new CustomProviderService(
+               certificateService,
+               endpoint,
+               signAlgorithm,
+               mgfAlgorithm,
+               saltLength,
+               nonDecorateSignature,
+               group,
+               serviceId,
+               user,
+               auth
+       );
+
+       String endcoded = Base64.getEncoder().encodeToString(data);
+
+       SignatureResponse response = new SignatureResponse(
+                12354567L,
+               endcoded,
+               "2030-11-23T18:25:43.511Z",
+                "353d4f18-4b78-b17c-5325-f92375cf40ec",
+                "a68e1ae4-41ac-b140-ad1e-3219ff08a4e9",
+                "SUCCESS",
+               null
+       );
+       //when(certificateService.getCertificate("dummy", endpoint, auth)).thenReturn(certificate);
+       //when(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).thenReturn(response);
+       doReturn(response).when(certificateService).getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth);
+       //Mockito.expect(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).toBe(response);
+       byte[] result = underTest.sign(key, "RSA", data);
+       assertEquals(data, result);
+    }
+
+
 }

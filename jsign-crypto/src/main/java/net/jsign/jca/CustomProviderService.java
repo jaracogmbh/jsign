@@ -163,6 +163,8 @@ public class CustomProviderService implements SigningService {
             return chain.toArray(new Certificate[0]);
         } catch (CertificateException | FailedCertificateExtractionException e) {
             logger.severe("Failed to get certificate chain from server for user with id: " + user);
+            logger.severe("Thrown exception: " + e.getClass());
+            logger.severe("Exception message: " + e.getMessage());
             throw new KeyStoreException("Failed to get certificate from server for user with id: " + user, e);
         }
     }
@@ -180,10 +182,10 @@ public class CustomProviderService implements SigningService {
     @Override
     public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException {
         logger.info("Signing data with certificate");
-        //DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(algorithm.substring(0, algorithm.toLowerCase().indexOf("with")));
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(signAlgorithm.substring(0, signAlgorithm.toLowerCase().indexOf("with")));
         data = digestAlgorithm.getMessageDigest().digest(data);
         SignatureResponse signature = certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, saltLength, nonDecorateSignature, group, serviceId, user, auth);
+        logger.info("Checking if signature was successful");
         if(signature.getSignReturnCode() == "FAILED"){
             logger.info("Failed to sign data with certificate!");
             String errorMessage = signature.getErrorMessage();
@@ -195,53 +197,4 @@ public class CustomProviderService implements SigningService {
         }
     }
 
-    // Helper methods for HTTP GET and POST requests
-
-    /*private Map<String, Object> httpGet(String path) throws IOException {
-        URL url = new URL(endpoint + path);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("x-api-key", apiKey);
-        conn.setRequestProperty("Accept", "application/json");
-
-        int responseCode = conn.getResponseCode();
-        logger.info("GET Response Code :: " + responseCode);
-
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream());
-            Map<String, Object> response = gson.fromJson(reader, new TypeToken<Map<String, Object>>() {}.getType());
-            reader.close();
-            return response;
-        } else {
-            throw new IOException("GET request failed with response code " + responseCode);
-        }
-    }
-
-    private Map<String, Object> httpPost(String path, Map<String, Object> payload) throws IOException {
-        URL url = new URL(endpoint + path);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("x-api-key", apiKey);
-        conn.setRequestProperty("Accept", "application/json");
-        conn.setRequestProperty("Content-Type", "application/json; utf-8");
-        conn.setDoOutput(true);
-
-        String jsonInputString = gson.toJson(payload);
-        try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = jsonInputString.getBytes("utf-8");
-            os.write(input, 0, input.length);
-        }
-
-        int responseCode = conn.getResponseCode();
-        logger.info("POST Response Code :: " + responseCode);
-
-        if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream());
-            Map<String, Object> response = gson.fromJson(reader, new TypeToken<Map<String, Object>>() {}.getType());
-            reader.close();
-            return response;
-        } else {
-            throw new IOException("POST request failed with response code " + responseCode);
-        }
-    }*/
 }

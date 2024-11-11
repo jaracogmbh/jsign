@@ -54,13 +54,6 @@ public class JsignCLI {
 
     public static void main(String... args) {
         try {
-            /*String[] test = new String[]{
-                    "-keystore/home/gabriela/Documents/keystore-test/KeyStore.jks",
-                    "-aliasnewkey",
-                    "-storepasspassword123",
-                    "-tsaurlhttp://timestamp.digicert.com",
-                    "visualvm.exe"
-            };*/
             String[] test = new String[]{
                     "-keystorehttp://localhost:8089",
                     "-storetypeCUSTOMPROVIDER",
@@ -69,7 +62,7 @@ public class JsignCLI {
                     "-storepassSHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password123456",
                     //"-storepass|||||||",
                     "-tsaurlhttp://timestamp.digicert.com",
-                    "psftp.exe"
+                    "Humanizer.dll"
             };
             new JsignCLI().execute(args);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
