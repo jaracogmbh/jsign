@@ -40,7 +40,7 @@ public class CustomProviderService implements SigningService {
     int saltLength;
     boolean nonDecorateSignature;
     String group;
-    int serviceId;
+    String serviceId;
     String user;
     String auth;
 
@@ -63,7 +63,7 @@ public class CustomProviderService implements SigningService {
                                  int saltLength,
                                  boolean nonDecorateSignature,
                                  String group,
-                                 int serviceId,
+                                 String serviceId,
                                  String user,
                                  String auth) throws NoEndpointSpecifiedException {
         HttpClient client = HttpClient.newHttpClient();
@@ -102,7 +102,7 @@ public class CustomProviderService implements SigningService {
                                  int saltLength,
                                  boolean nonDecorateSignature,
                                  String group,
-                                 int serviceId,
+                                 String serviceId,
                                  String user,
                                  String auth) throws NoEndpointSpecifiedException {
         this.certificateService = certificateService;

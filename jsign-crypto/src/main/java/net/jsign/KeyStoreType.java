@@ -140,7 +140,6 @@ public enum KeyStoreType {
             String[] elements = params.storepass().split("\\|");
             boolean nonDecorateSignature;
             int saltLength;
-            int serviceId;
             if(checker.checkIfBoolean(elements[3])) {
                 nonDecorateSignature = Boolean.parseBoolean(elements[3]);
             }else {
@@ -152,13 +151,7 @@ public enum KeyStoreType {
             else{
                 throw new NotCorrectIntegerValueException("The value of salt length is not an integer value");
             }
-            if(checker.checkIfInteger(elements[5])) {
-                serviceId = Integer.parseInt(elements[5]);
-            }
-            else{
-                throw new NotCorrectIntegerValueException("The value of service id is not an integer value");
-            }
-            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], serviceId, elements[6], elements[7]));
+            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
         }
 
         @Override

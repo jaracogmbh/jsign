@@ -5,7 +5,6 @@ import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.SignatureResponse;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -80,7 +79,7 @@ public class CertificateServiceTest {
                 "}"
         );
         when(response.statusCode()).thenReturn(200);
-        SignatureResponse result = underTest.getSignature(endpoint, data, "SHA256withRSA", "MGF1", 32, true, "group", 1234, "user", auth);
+        SignatureResponse result = underTest.getSignature(endpoint, data, "SHA256withRSA", "MGF1", 32, true, "group", "1234", "user", auth);
         assertEquals(1235456, result.getSignTime().longValue());
         assertEquals("v686SHskn4n/", result.getSignedHash());
         assertEquals("2030-11-23T18:25:43.511Z", result.getValidUntil());
@@ -100,7 +99,7 @@ public class CertificateServiceTest {
         when(response.body()).thenReturn("error");
         when(response.statusCode()).thenReturn(500);
         try {
-            underTest.getSignature(endpoint, data, "SHA256withRSA", "MGF1", 32, true, "group", 1234, "user", auth);
+            underTest.getSignature(endpoint, data, "SHA256withRSA", "MGF1", 32, true, "group", "1234", "user", auth);
         } catch (FailedSignatureExtractionException e) {
             assertEquals("error", e.getMessage());
         }

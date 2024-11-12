@@ -39,7 +39,7 @@ public class CustomProviderServiceTest {
        int saltLength = 32;
        boolean nonDecorateSignature = false;
        String group = "group";
-       int serviceId = 1;
+       String serviceId = "12345";
        String user = "user";
        String auth = "password";
 
@@ -73,7 +73,7 @@ public class CustomProviderServiceTest {
        int saltLength = 32;
        boolean nonDecorateSignature = false;
        String group = "group";
-       int serviceId = 1;
+       String serviceId = "12345";
        String user = "user";
        String auth = "password";
 
@@ -105,7 +105,7 @@ public class CustomProviderServiceTest {
          int saltLength = 32;
          boolean nonDecorateSignature = false;
          String group = "group";
-         int serviceId = 1;
+         String serviceId = "12345";
          String user = "user";
          String auth = "password";
          try {
@@ -135,7 +135,7 @@ public class CustomProviderServiceTest {
        int saltLength = 32;
        boolean nonDecorateSignature = false;
        String group = "group";
-       int serviceId = 1;
+       String serviceId = "12345";
        String user = "user";
        String auth = "password";
        byte[] data = "Das ist die Datei".getBytes();
@@ -167,7 +167,7 @@ public class CustomProviderServiceTest {
        );
        //when(certificateService.getCertificate("dummy", endpoint, auth)).thenReturn(certificate);
        //when(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).thenReturn(response);
-       doReturn(response).when(certificateService).getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth);
+       doReturn(response).when(certificateService).getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, "1234", user, auth);
        //Mockito.expect(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).toBe(response);
        byte[] result = underTest.sign(key, "RSA", data);
        assertEquals(data, result);

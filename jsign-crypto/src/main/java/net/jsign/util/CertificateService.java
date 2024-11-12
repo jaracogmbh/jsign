@@ -40,7 +40,7 @@ public class CertificateService {
             int saltLength,
             boolean nonDecorateSignature,
             String itsGroup,
-            int itsServiceId,
+            String itsServiceId,
             String user,
             String auth
             ) throws FailedSignatureExtractionException {
@@ -53,9 +53,9 @@ public class CertificateService {
             String jsonBody =
                     "{" +
                       "\"hash\": \"" + fileHash + "\"," +
-                      "\"signatureAlgorith\": \"" + signatureAlgorithm +"\"," +
+                      "\"signatureAlgorithm\": \"" + signatureAlgorithm +"\"," +
                       "\"mgf1Algorithm\": \"" + mgf1Algorithm +"\"," +
-                      "\"saltLenght\" : " + saltLength + "," +
+                      "\"saltLength\" : " + saltLength + "," +
                       "\"nonDecorateSignature\": "+nonDecorateSignature+"," +
                       "\"itsGroup\": \""+itsGroup+"\"," +
                       "\"itsServiceId\": "+itsServiceId+"," +
