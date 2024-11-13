@@ -1,24 +1,15 @@
 package net.jsign.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jsign.exception.FailedCertificateExtractionException;
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.model.CertificateDTO;
-import net.jsign.model.Chain;
 import net.jsign.model.SignatureResponse;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class CertificateService {

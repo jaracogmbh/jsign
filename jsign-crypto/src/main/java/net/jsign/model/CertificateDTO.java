@@ -1,9 +1,6 @@
 package net.jsign.model;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
-
 import java.util.List;
 import java.util.Objects;
 

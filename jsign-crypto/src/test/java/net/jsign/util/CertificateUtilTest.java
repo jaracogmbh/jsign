@@ -5,8 +5,6 @@ import net.jsign.model.CertificateDTO;
 import net.jsign.model.SignatureResponse;
 import org.junit.Test;
 
-import java.util.Optional;
-
 import static org.junit.Assert.*;
 
 public class CertificateUtilTest {

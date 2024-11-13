@@ -7,14 +7,40 @@ Für die Ausführung des ``Custom Provider Service`` müssen folgende jsign Para
 - ``storetype``: ``CUSTOMPROVIDER``
 - ``keystore``: API Endpunkt
 - ``storepass``: ``<signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>``
-  - Es ist bei den einzelnen Parameter folgendes zu beachten:
-    - ``non decorate signature``: ``true`` oder ``false`` oder ``TRUE`` oder ``FALSE`` oder ``0`` oder ``1``
-    - ``sal length``müss numerisch sein
-    - leere Werte wie ``||`` sind nicht erlaubt
 - Pfad zur Datei, die signiert werden soll
 - ``alias``: hier muss ein Wert gesetzt werden.
 
-## Ausführung über die Kommando Zeile
+### ```storepass``` Parameter
+Der ``storepass`` Parameter ist ein String, der die folgenden Informationen enthält:
+- ``signature algorithm``: Signatur Algorithmus
+- ``mgf1 algorithm``: MGF1 Algorithmus
+- ``salt length``: Salt Länge für dem MGF1 Algorithmus
+  - hier ist nur ein gültiger Zahlenwert erlaubt als Eingabe
+- ``non decorate signature``: Non Decorate Signature
+  - hier werden nur folgende Werte als Eingabe akzeptier:
+    - ``true``, ``false``,  ``TRUE``, ``FALSE``, ``0``, ``1`` 
+- ``group``: die Gruppenbezeichnung der ITS Gruppe
+- ``service id``: Service ID des ITS Services
+- ``user``: Benutzer Identifikation
+- ``auth``: Authentifizierung für die Basic Authentifizierung über die HTTP Header
+
+#### Aufbau des ``storepass`` Parameters
+Da relativ viele Informationen in einem String übergeben werden müssen, ist es wichtig, dass die Informationen in der richtigen Reihenfolge und mit dem richtigen Trennzeichen übergeben werden. Das Trennzeichen ist der ``|``. Die Reihenfolge der Informationen ist wie folgt:
+
+```
+<signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
+```
+Auperdem ist zu beachten, dass leere Werte (``||``) nicht erlaubt sind. Hier wird dann ein Fehler geworfen und das Programm wird beendet. Auch müssen alle Werte gesetzt werden.
+
+#### Beispiel für den ``storepass`` Parameter
+``` 
+SHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password12345
+```
+
+### Endpunkt
+Sowohl das Certifikat als auch die Signature werden über eine API ermittelt bzw. erstellt. Der Endpunkt wird über den Parameter ``keysotre`` übergeben. Der Endpunkt ist dabei nur der Hostname und der Port (Oder die Domain). Der Pfad der Endpunkte für die Zertifikate und Signaturen sind im Programm festgelegt. Der Wert für den Endpunkt darf kein ``/`` am Ende enthalten.
+
+### Ausführung über die Kommando Zeile
 - Beispiel:
 
 ```
@@ -30,9 +56,13 @@ Da ``jsign`` keine ``.JAR`` Dateien signieren kann, wird ``jarsigner`` in Kommbi
  jarsigner -J-cp -Jjsign-7.0-SNAPSHOT.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089" -keystore NONE -sigalg SHA256withRSA -digestalg SHA-256 application_original.jar test 
 ```
 
-### Bemerkung: 
+
+### Bemerkungen bei der Ausführung mit ``jarsigner``: 
+- zu beachten:
+  - der `keystore` Parameter muss auf ``NONE`` gesetzt werden
+  - der Endpunkt wird über den ``providerArg`` Parameter übergeben
 - Zusätzliche Parameter:
-    - sigalg: Signatur Algorithmus
-    - digestalg: Digest Algorithmus
+    - ``sigalg``: Signatur Algorithmus
+    - ``digestalg``: Digest Algorithmus
 - letzter Parameter ist der ``alias``
 - Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die REST API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen. Dadurch kann ``Jarsigner`` aber nicht verifizieren, ob die Signatur gültig ist, da es keine Zeitstempel gibt, die er überprüfen kann.

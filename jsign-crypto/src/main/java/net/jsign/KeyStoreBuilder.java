@@ -19,7 +19,6 @@ package net.jsign;
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotCorrectIntegerValueException;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

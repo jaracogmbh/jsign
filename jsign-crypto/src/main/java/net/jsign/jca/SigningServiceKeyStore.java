@@ -27,7 +27,6 @@ class SigningServiceKeyStore extends AbstractKeyStoreSpi {
     
     private final SigningService service;
 
-
     public SigningServiceKeyStore(SigningService service) {
         this.service = service;
     }

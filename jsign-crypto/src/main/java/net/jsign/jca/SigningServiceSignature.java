@@ -18,7 +18,6 @@ package net.jsign.jca;
 
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.exception.SignRequestFailedException;
-
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;

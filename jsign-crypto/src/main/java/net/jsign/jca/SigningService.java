@@ -18,7 +18,6 @@ package net.jsign.jca;
 
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.exception.SignRequestFailedException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.UnrecoverableKeyException;
