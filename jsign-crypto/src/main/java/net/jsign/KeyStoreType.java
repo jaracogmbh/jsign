@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
 import net.jsign.exception.NoEndpointSpecifiedException;
@@ -127,10 +128,13 @@ public enum KeyStoreType {
      */
     CUSTOMPROVIDER(false, false, false) {
         ParameterChecker checker = new ParameterChecker();
+        Logger logger = Logger.getLogger(this.getClass().getName());
         @Override
         void validate(KeyStoreBuilder params) {
-
+            logger.info("Validating CUSTOMPROVIDER keystore parameters");
             if (params.storepass() == null || params.storepass().split("\\|").length != 8 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
+                logger.severe("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
+                logger.severe("storepass: " + params.storepass());
                 throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
             }
         }
@@ -140,15 +144,19 @@ public enum KeyStoreType {
             String[] elements = params.storepass().split("\\|");
             boolean nonDecorateSignature;
             int saltLength;
+            logger.info("Verifying the values of non decorate signature parameters");
             if(checker.checkIfBoolean(elements[3])) {
                 nonDecorateSignature = Boolean.parseBoolean(elements[3]);
             }else {
+                logger.severe("The value of non decorate signature is not a boolean value");
                 throw new NotABooleanValueException("The value of non decorate signature is not a boolean value");
             }
+            logger.info("Verifying the values of salt length parameters");
             if(checker.checkIfInteger(elements[2])) {
                 saltLength = Integer.parseInt(elements[2]);
             }
             else{
+                logger.severe("The value of salt length is not an integer value");
                 throw new NotCorrectIntegerValueException("The value of salt length is not an integer value");
             }
             return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
@@ -162,23 +170,22 @@ public enum KeyStoreType {
         @Override
         KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
             try {
-                System.out.println("Initializing KeyStore for CUSTOMPROVIDER");
-                System.out.println("Endpoint: " + params.keystore());
-                System.out.println("API Key: " + (params.storepass() != null ? "Provided" : "Not Provided"));
+                logger.info("Initializing KeyStore for CUSTOMPROVIDER");
+                logger.info("Endpoint: " + params.keystore());
+                logger.info("Storepass: " + (params.storepass() != null ? "Provided" : "Not Provided"));
 
                 KeyStore ks = KeyStore.getInstance("SigningService", provider);
 
-                System.out.println("Created KeyStore instance with provider: " + provider.getName());
+                logger.info("Created KeyStore instance with provider: " + provider.getName());
 
                 ks.load(null, null);  // no input stream, as expected for this setup
 
-                System.out.println("KeyStore loaded successfully for CUSTOMPROVIDER");
+                logger.info("KeyStore loaded successfully for CUSTOMPROVIDER");
 
                 return ks;
             } catch (Exception e) {
-                System.err.println("Exception occurred while loading KeyStore:");
+                logger.severe("Exception occurred while loading KeyStore:");
                 e.printStackTrace();
-
                 throw new KeyStoreException("Unable to load the CUSTOMPROVIDER keystore", e);
             }
         }

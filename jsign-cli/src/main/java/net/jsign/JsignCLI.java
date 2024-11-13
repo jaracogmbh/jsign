@@ -62,7 +62,7 @@ public class JsignCLI {
                     "-storepassSHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password123456",
                     //"-storepass|||||||",
                     "-tsaurlhttp://timestamp.digicert.com",
-                    "Humanizer.dll"
+                    "psftp.exe"
             };
             new JsignCLI().execute(args);
         } catch (SignerException | IllegalArgumentException | ParseException e) {

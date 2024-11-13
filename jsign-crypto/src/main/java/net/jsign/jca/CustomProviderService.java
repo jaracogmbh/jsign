@@ -90,8 +90,8 @@ public class CustomProviderService implements SigningService {
         this.serviceId = serviceId;
         logger.info("Setting user to: " + user);
         this.user = user;
-        logger.info("Setting auth to: " + auth);
         this.auth = auth;
+        logger.info("auth was successfully set");
     }
 
     // For testing purposes
@@ -128,8 +128,8 @@ public class CustomProviderService implements SigningService {
         this.serviceId = serviceId;
         logger.info("Setting user to: " + user);
         this.user = user;
-        logger.info("Setting auth to: " + auth);
         this.auth = auth;
+        logger.info("auth was successfully set");
     }
 
     @Override
