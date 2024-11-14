@@ -64,7 +64,7 @@ public class JsignCLI {
                     "-tsaurlhttp://timestamp.digicert.com",
                     "psftp.exe"
             };
-            new JsignCLI().execute(args);
+            new JsignCLI().execute(test);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());
             if (e.getCause() != null) {

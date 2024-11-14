@@ -18,7 +18,7 @@ package net.jsign;
 
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotCorrectIntegerValueException;
+import net.jsign.exception.NotACorrectIntegerValueException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -270,7 +270,7 @@ public class KeyStoreBuilder {
     /**
      * Returns the provider used to sign with the keystore.
      */
-    public Provider provider() throws NoEndpointSpecifiedException, NotCorrectIntegerValueException, NotABooleanValueException {
+    public Provider provider() throws NoEndpointSpecifiedException, NotACorrectIntegerValueException, NotABooleanValueException {
         if (provider == null) {
             provider = storetype().getProvider(this);
         }
@@ -283,7 +283,7 @@ public class KeyStoreBuilder {
      * @throws IllegalArgumentException if the parameters are invalid
      * @throws KeyStoreException if the keystore can't be loaded
      */
-    public KeyStore build() throws KeyStoreException, NoEndpointSpecifiedException, NotCorrectIntegerValueException, NotABooleanValueException {
+    public KeyStore build() throws KeyStoreException, NoEndpointSpecifiedException, NotACorrectIntegerValueException, NotABooleanValueException {
         validate();
         return storetype().getKeystore(this, provider());
     }
@@ -297,7 +297,7 @@ public class KeyStoreBuilder {
             public KeyStore getKeyStore() throws KeyStoreException {
                 try {
                     return build();
-                } catch (NoEndpointSpecifiedException | NotCorrectIntegerValueException | NotABooleanValueException e) {
+                } catch (NoEndpointSpecifiedException | NotACorrectIntegerValueException | NotABooleanValueException e) {
                     throw new RuntimeException(e);
                 }
             }

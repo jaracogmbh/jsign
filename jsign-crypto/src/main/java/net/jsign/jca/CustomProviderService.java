@@ -184,16 +184,23 @@ public class CustomProviderService implements SigningService {
         logger.info("Signing data with certificate");
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(signAlgorithm.substring(0, signAlgorithm.toLowerCase().indexOf("with")));
         data = digestAlgorithm.getMessageDigest().digest(data);
-        SignatureResponse signature = certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, saltLength, nonDecorateSignature, group, serviceId, user, auth);
-        logger.info("Checking if signature was successful");
-        if(signature.getSignReturnCode() == "FAILED"){
-            logger.info("Failed to sign data with certificate!");
-            String errorMessage = signature.getErrorMessage();
-            logger.info("An error occured while creating the signature on the server site: " + signature.getErrorMessage());
-            throw new SignRequestFailedException(errorMessage);
-        }else{
-            logger.info("Successfully signed data with certificate");
-            return Base64.getDecoder().decode(signature.getSignedHash());
+        try {
+            SignatureResponse signature = certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, saltLength, nonDecorateSignature, group, serviceId, user, auth);
+            logger.info("Checking if signature was successful");
+            if (signature.getSignReturnCode() == "FAILED") {
+                logger.info("Failed to sign data with certificate!");
+                String errorMessage = signature.getErrorMessage();
+                logger.info("An error occured while creating the signature on the server site: " + signature.getErrorMessage());
+                throw new SignRequestFailedException(errorMessage);
+            } else {
+                logger.info("Successfully signed data with certificate");
+                return Base64.getDecoder().decode(signature.getSignedHash());
+            }
+        }catch(Exception e){
+            logger.severe("Failed to sign data with certificate");
+            logger.severe("Thrown exception: " + e.getClass());
+            logger.severe("Exception message: " + e.getMessage());
+            throw new GeneralSecurityException("Failed to sign data with certificate", e);
         }
     }
 

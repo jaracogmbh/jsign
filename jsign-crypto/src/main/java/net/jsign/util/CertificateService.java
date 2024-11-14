@@ -58,7 +58,7 @@ public class CertificateService {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
                     .header("Content-Type", "application/json")
-                    .header("Authorization", auth)
+                    .header("Authorization", "Basic " + auth)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
@@ -86,7 +86,7 @@ public class CertificateService {
             logger.info("Used endpoint: " + endpoint);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(endpoint + "/certificate"))
-                    .header("Authorization", auth)
+                    .header("Authorization", "Basic " + auth)
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

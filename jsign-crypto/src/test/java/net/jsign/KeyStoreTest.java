@@ -2,7 +2,7 @@ package net.jsign;
 
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotCorrectIntegerValueException;
+import net.jsign.exception.NotACorrectIntegerValueException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -76,7 +76,7 @@ public class KeyStoreTest {
         KeyStoreBuilder keyStoreparams = new KeyStoreBuilder();
         keyStoreparams.storepass("algSig|MFG1|keineNummer|true|group|1234|user|passwort1234");
         keyStoreparams.keypass("http://localhost:8080");
-        Exception exception = assertThrows(NotCorrectIntegerValueException.class, () -> {
+        Exception exception = assertThrows(NotACorrectIntegerValueException.class, () -> {
             underTest.getProvider(keyStoreparams);
         });
         assertEquals("The value of salt length is not an integer value", exception.getMessage());
@@ -87,7 +87,7 @@ public class KeyStoreTest {
         KeyStoreBuilder keyStoreparams = new KeyStoreBuilder();
         keyStoreparams.storepass("algSig|MFG1|32|true|group|keineNummer|user|passwort1234");
         keyStoreparams.keypass("http://localhost:8080");
-        Exception exception = assertThrows(NotCorrectIntegerValueException.class, () -> {
+        Exception exception = assertThrows(NotACorrectIntegerValueException.class, () -> {
             underTest.getProvider(keyStoreparams);
         });
         assertEquals("The value of service id is not an integer value", exception.getMessage());

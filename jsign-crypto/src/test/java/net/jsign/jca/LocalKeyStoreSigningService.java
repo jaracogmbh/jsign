@@ -30,7 +30,7 @@ import java.util.List;
 import net.jsign.KeyStoreBuilder;
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotCorrectIntegerValueException;
+import net.jsign.exception.NotACorrectIntegerValueException;
 
 /**
  * Signing service using a local KeyStore (for testing only).
@@ -40,7 +40,7 @@ class LocalKeyStoreSigningService implements SigningService {
     private final String keypass;
     private final KeyStore keystore;
 
-    public LocalKeyStoreSigningService(String keystore, String storepass, String keypass) throws KeyStoreException, NoEndpointSpecifiedException, NotCorrectIntegerValueException, NotABooleanValueException {
+    public LocalKeyStoreSigningService(String keystore, String storepass, String keypass) throws KeyStoreException, NoEndpointSpecifiedException, NotACorrectIntegerValueException, NotABooleanValueException {
         this.keypass = keypass;
         this.keystore = new KeyStoreBuilder().keystore(keystore).storepass(storepass).build();
     }

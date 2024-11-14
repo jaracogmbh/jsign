@@ -46,12 +46,8 @@ class SigningServiceSignature extends AbstractSignatureSpi {
     protected byte[] engineSign() throws SignatureException {
         try {
             return privateKey.getService().sign(privateKey, signingAlgorithm, buffer.toByteArray());
-        } catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException | FailedSignatureExtractionException | SignRequestFailedException e) {
             throw new SignatureException(e);
-        } catch (SignRequestFailedException e) {
-            throw new RuntimeException(e);
-        } catch (FailedSignatureExtractionException e) {
-            throw new RuntimeException(e);
         }
     }
 }

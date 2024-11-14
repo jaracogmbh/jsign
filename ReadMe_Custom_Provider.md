@@ -1,4 +1,4 @@
-# Custome Provider Service für das Signieren von Dateien über eine REST API
+# Custome Provider Service für das Signieren von Dateien über eine API
 
 ## Ausführung über jsign
 
@@ -10,12 +10,15 @@ Für die Ausführung des ``Custom Provider Service`` müssen folgende jsign Para
 - Pfad zur Datei, die signiert werden soll
 - ``alias``: hier muss ein Wert gesetzt werden.
 
+### Kompatibilität
+Der ``Custom Provider Service`` ist nicht kompatibel mit ``Java 1.8``. Es wird mindestens ``Java 11`` benötigt.
+
 ### ```storepass``` Parameter
 Der ``storepass`` Parameter ist ein String, der die folgenden Informationen enthält:
 - ``signature algorithm``: Signatur Algorithmus
 - ``mgf1 algorithm``: MGF1 Algorithmus
 - ``salt length``: Salt Länge für dem MGF1 Algorithmus
-  - hier ist nur ein gültiger Zahlenwert erlaubt als Eingabe
+  - hier ist nur ein gültiger Zahlenwert als Eingabe erlaubt
 - ``non decorate signature``: Non Decorate Signature
   - hier werden nur folgende Werte als Eingabe akzeptier:
     - ``true``, ``false``,  ``TRUE``, ``FALSE``, ``0``, ``1`` 
@@ -38,7 +41,7 @@ SHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password12345
 ```
 
 ### Endpunkt
-Sowohl das Certifikat als auch die Signature werden über eine API ermittelt bzw. erstellt. Der Endpunkt wird über den Parameter ``keysotre`` übergeben. Der Endpunkt ist dabei nur der Hostname und der Port (Oder die Domain). Der Pfad der Endpunkte für die Zertifikate und Signaturen sind im Programm festgelegt. Der Wert für den Endpunkt darf kein ``/`` am Ende enthalten.
+Sowohl das Certifikat als auch die Signature werden über eine API ermittelt bzw. erstellt. Der Endpunkt wird über den Parameter ``keysotre`` übergeben. Der Endpunkt ist dabei nur der Hostname und der Port (Oder die Domain). Der Pfad der Endpunkte für die Zertifikate und Signaturen sind im Programm festgelegt. 
 
 ### Ausführung über die Kommando Zeile
 - Beispiel:
@@ -61,8 +64,9 @@ Da ``jsign`` keine ``.JAR`` Dateien signieren kann, wird ``jarsigner`` in Kommbi
 - zu beachten:
   - der `keystore` Parameter muss auf ``NONE`` gesetzt werden
   - der Endpunkt wird über den ``providerArg`` Parameter übergeben
-- Zusätzliche Parameter:
+- Zusätzliche Flags:
     - ``sigalg``: Signatur Algorithmus
     - ``digestalg``: Digest Algorithmus
-- letzter Parameter ist der ``alias``
-- Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die REST API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen. Dadurch kann ``Jarsigner`` aber nicht verifizieren, ob die Signatur gültig ist, da es keine Zeitstempel gibt, die er überprüfen kann.
+    - diese beiden Flags müssen gesetzt werden, da ``jarsigner`` sonst nicht die Signatur erstellen kann.
+- letzter Parameter ist der ``alias``. Das muss zwingend auch der letzte Parameter sein.
+- Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen, weshalb die Warnung ignoriert werden kann.

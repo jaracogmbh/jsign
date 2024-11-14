@@ -22,6 +22,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -126,7 +127,7 @@ public class CustomProviderServiceTest {
          }
    }
 
-   //@Test
+   @Test
    public void signSuccessTest() throws NoEndpointSpecifiedException, FailedCertificateExtractionException, GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException {
        CertificateService certificateService = Mockito.mock(CertificateService.class);
        String endpoint = "http://localhost:8089";
@@ -140,6 +141,7 @@ public class CustomProviderServiceTest {
        String auth = "password";
        byte[] data = "Das ist die Datei".getBytes();
        SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
+       byte[] expected = "this is the signature".getBytes();
 
        CustomProviderService underTest = new CustomProviderService(
                certificateService,
@@ -154,7 +156,7 @@ public class CustomProviderServiceTest {
                auth
        );
 
-       String endcoded = Base64.getEncoder().encodeToString(data);
+       String endcoded = Base64.getEncoder().encodeToString(expected);
 
        SignatureResponse response = new SignatureResponse(
                 12354567L,
@@ -165,13 +167,56 @@ public class CustomProviderServiceTest {
                 "SUCCESS",
                null
        );
-       //when(certificateService.getCertificate("dummy", endpoint, auth)).thenReturn(certificate);
-       //when(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).thenReturn(response);
-       doReturn(response).when(certificateService).getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, "1234", user, auth);
-       //Mockito.expect(certificateService.getSignature(endpoint, data, signAlgorithm, mgfAlgorithm, 0, true, group, 1234, user, auth)).toBe(response);
+       doReturn(response).when(certificateService).getSignature(anyString(), any(byte[].class), anyString(), anyString(), anyInt(), anyBoolean(), anyString(), anyString(), anyString(), anyString());
        byte[] result = underTest.sign(key, "RSA", data);
-       assertEquals(data, result);
-    }
+       assertEquals(new String(expected), new String(result));
+   }
 
+    @Test
+    public void signFailedTest() throws NoEndpointSpecifiedException, FailedCertificateExtractionException, GeneralSecurityException, FailedSignatureExtractionException {
+        CertificateService certificateService = Mockito.mock(CertificateService.class);
+        String endpoint = "http://localhost:8089";
+        String signAlgorithm = "SHA256withRSA";
+        String mgfAlgorithm = "MGF1";
+        int saltLength = 32;
+        boolean nonDecorateSignature = false;
+        String group = "group";
+        String serviceId = "12345";
+        String user = "user";
+        String auth = "password";
+        byte[] data = "Das ist die Datei".getBytes();
+        SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
+        byte[] expected = "this is the signature".getBytes();
+
+        CustomProviderService underTest = new CustomProviderService(
+                certificateService,
+                endpoint,
+                signAlgorithm,
+                mgfAlgorithm,
+                saltLength,
+                nonDecorateSignature,
+                group,
+                serviceId,
+                user,
+                auth
+        );
+        String endcoded = Base64.getEncoder().encodeToString(expected);
+
+        SignatureResponse response = new SignatureResponse(
+                12354567L,
+                endcoded,
+                "2030-11-23T18:25:43.511Z",
+                "353d4f18-4b78-b17c-5325-f92375cf40ec",
+                "a68e1ae4-41ac-b140-ad1e-3219ff08a4e9",
+                "FAILED",
+                "error"
+        );
+
+        when(certificateService.getSignature(anyString(), any(byte[].class), anyString(), anyString(), anyInt(), anyBoolean(), anyString(), anyString(), anyString(), anyString())).thenReturn(response);
+        Exception exception = assertThrows(GeneralSecurityException.class, () -> underTest.sign(key, "RSA", data));
+        assertEquals(SignRequestFailedException.class, exception.getCause().getClass());
+        assertEquals("error", exception.getCause().getMessage());
+        assertEquals("Failed to sign data with certificate", exception.getMessage());
+    }
 
 }

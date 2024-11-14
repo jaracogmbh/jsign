@@ -37,7 +37,7 @@ import javax.smartcardio.CardException;
 
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotCorrectIntegerValueException;
+import net.jsign.exception.NotACorrectIntegerValueException;
 import net.jsign.jca.AmazonCredentials;
 import net.jsign.jca.AmazonSigningService;
 import net.jsign.jca.AzureKeyVaultSigningService;
@@ -140,7 +140,7 @@ public enum KeyStoreType {
         }
 
         @Override
-        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotCorrectIntegerValueException {
+        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
             String[] elements = params.storepass().split("\\|");
             boolean nonDecorateSignature;
             int saltLength;
@@ -157,7 +157,7 @@ public enum KeyStoreType {
             }
             else{
                 logger.severe("The value of salt length is not an integer value");
-                throw new NotCorrectIntegerValueException("The value of salt length is not an integer value");
+                throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
             }
             return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
         }
@@ -656,7 +656,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotCorrectIntegerValueException {
+    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
         return null;
     }
 
