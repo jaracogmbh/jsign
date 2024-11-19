@@ -1,4 +1,4 @@
-package net.jsign.exception;
+package net.jsign.exceptions;
 
 public class NotABooleanValueException extends Exception{
     public NotABooleanValueException(String message) {

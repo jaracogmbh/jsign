@@ -1,9 +1,10 @@
-package net.jsign.util;
+package util;
 
 import net.jsign.exception.FailedCertificateExtractionException;
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.SignatureResponse;
+import net.jsign.util.CertificateService;
 import org.junit.Test;
 import org.mockito.Mockito;
 

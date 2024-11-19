@@ -1,9 +1,11 @@
-package net.jsign.jca;
+package jca;
 
 import net.jsign.exception.FailedCertificateExtractionException;
 import net.jsign.exception.FailedSignatureExtractionException;
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
+import net.jsign.jca.CustomProviderService;
+import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.Chain;
 import net.jsign.model.SignatureResponse;

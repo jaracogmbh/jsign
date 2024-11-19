@@ -180,7 +180,7 @@ public class CustomProviderService implements SigningService {
     }
 
     @Override
-    public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException {
+    public byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException {
         logger.info("Signing data with certificate");
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.of(signAlgorithm.substring(0, signAlgorithm.toLowerCase().indexOf("with")));
         data = digestAlgorithm.getMessageDigest().digest(data);

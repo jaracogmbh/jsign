@@ -1,4 +1,4 @@
-package net.jsign.exception;
+package net.jsign.exceptions;
 
 public class NotACorrectIntegerValueException extends Exception{
     public NotACorrectIntegerValueException(String message) {

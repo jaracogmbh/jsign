@@ -1,0 +1,8 @@
+
+services:
+  customwiremocktest:
+    image:   jaracogmbh/echoserve:1.0.0
+    volumes:
+      - ./mappings:/data:ro
+    ports:
+      - "8089:8089"
