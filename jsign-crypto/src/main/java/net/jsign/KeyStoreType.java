@@ -38,22 +38,8 @@ import javax.smartcardio.CardException;
 import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.jca.AmazonCredentials;
-import net.jsign.jca.AmazonSigningService;
-import net.jsign.jca.AzureKeyVaultSigningService;
-import net.jsign.jca.AzureTrustedSigningService;
-import net.jsign.jca.DigiCertOneSigningService;
-import net.jsign.jca.ESignerSigningService;
-import net.jsign.jca.GaraSignCredentials;
-import net.jsign.jca.GaraSignSigningService;
-import net.jsign.jca.GoogleCloudSigningService;
-import net.jsign.jca.HashiCorpVaultSigningService;
-import net.jsign.jca.OpenPGPCardSigningService;
-import net.jsign.jca.OracleCloudCredentials;
-import net.jsign.jca.OracleCloudSigningService;
-import net.jsign.jca.PIVCardSigningService;
-import net.jsign.jca.SigningServiceJcaProvider;
-import net.jsign.jca.CustomProviderService;
+import net.jsign.instantiation.CustomProviderServiceInstantiation;
+import net.jsign.jca.*;
 import net.jsign.util.ParameterChecker;
 
 /**
@@ -129,6 +115,8 @@ public enum KeyStoreType {
     CUSTOMPROVIDER(false, false, false) {
         ParameterChecker checker = new ParameterChecker();
         Logger logger = Logger.getLogger(this.getClass().getName());
+        CustomProviderServiceInstantiation instantiationService = new CustomProviderServiceInstantiation();
+        String fullyQualifiedClassName = "net.jsign.jca.CustomProviderService";
         @Override
         void validate(KeyStoreBuilder params) {
             logger.info("Validating CUSTOMPROVIDER keystore parameters");
@@ -159,7 +147,8 @@ public enum KeyStoreType {
                 logger.severe("The value of salt length is not an integer value");
                 throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
             }
-            return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+            return new SigningServiceJcaProvider(instantiationService.instantiateProviderService(fullyQualifiedClassName, params.keystore(), elements));
+            //return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
         }
 
         @Override
