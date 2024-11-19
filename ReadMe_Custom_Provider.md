@@ -12,7 +12,8 @@ Für die Ausführung des ``Custom Provider Service`` müssen folgende jsign Para
 
 ### Kompatibilität
 Der ``Custom Provider Service`` ist nicht kompatibel mit ``Java 1.8``. Es wird mindestens ``Java 11`` benötigt.
-
+### ``storetype`` Parameter
+Der ``storetype`` Parameter ist ein String, der den Typ des KeyStores angibt. In diesem Fall ist der Typ ``CUSTOMPROVIDER``. Dieser Parameter ist notwendig, damit das Programm weiß, dass es sich um den ``Custom Provider Service`` handelt.
 ### ```storepass``` Parameter
 Der ``storepass`` Parameter ist ein String, der die folgenden Informationen enthält:
 - ``signature algorithm``: Signatur Algorithmus
@@ -64,9 +65,11 @@ Da ``jsign`` keine ``.JAR`` Dateien signieren kann, wird ``jarsigner`` in Kommbi
 - zu beachten:
   - der `keystore` Parameter muss auf ``NONE`` gesetzt werden
   - der Endpunkt wird über den ``providerArg`` Parameter übergeben
+    - dieser Parameter ist notwendig, damit ``jarsigner`` weiß, dass es sich um den ``Custom Provider Service`` handelt.
+    - außerdem ist dieser Parameter nicht nativ in ``jsign`` vorhanden, sonder nur in Kombination mit ``jarsigner``.
 - Zusätzliche Flags:
     - ``sigalg``: Signatur Algorithmus
     - ``digestalg``: Digest Algorithmus
-    - diese beiden Flags müssen gesetzt werden, da ``jarsigner`` sonst nicht die Signatur erstellen kann.
-- letzter Parameter ist der ``alias``. Das muss zwingend auch der letzte Parameter sein.
+    - diese beiden Flags müssen gesetzt werden, da ``jarsigner`` sonst nicht den richtigen Algorithmus für die Signature benutzt.
+- letzter Parameter ist der ``alias``. Dieser muss zwingend an letzter Stelle stehen.
 - Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen, weshalb die Warnung ignoriert werden kann.
