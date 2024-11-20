@@ -37,7 +37,6 @@ import net.jsign.DigestAlgorithm;
 import net.jsign.KeyStoreBuilder;
 import net.jsign.KeyStoreType;
 
-
 /**
  * JCA provider using a Jsign keystore and compatible with jarsigner and apksigner.
  *
@@ -106,7 +105,7 @@ public class JsignJcaProvider extends Provider {
             builder.certfile("");
         }
 
-        private KeyStore getKeyStore() throws KeyStoreException{
+        private KeyStore getKeyStore() throws KeyStoreException {
             if (keystore == null) {
                 keystore = builder.build();
             }
