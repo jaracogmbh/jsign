@@ -2,7 +2,7 @@ package net.jsign.jca;
 
 public interface CustomProviderService {
 
-    public void validate();
-    public SigningService init();
+    public void validate(String keystore, String parameters);
+    public void init(String keystore, String parameters);
 
 }

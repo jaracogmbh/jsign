@@ -1,57 +1,42 @@
 package net.jsign.instantiation;
 
 
-import net.jsign.exceptions.NotABooleanValueException;
-import net.jsign.exceptions.NotACorrectIntegerValueException;
 import net.jsign.jca.SigningService;
-import net.jsign.util.ParameterChecker;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Logger;
 
 public class CustomProviderServiceInstantiation {
 
     Logger logger = Logger.getLogger(CustomProviderServiceInstantiation.class.getName());
-    ParameterChecker checker = new ParameterChecker();
 
-    public SigningService instantiateProviderService(String fullyQualifiedName, String keystore, String[] parameters) {
+    public SigningService instantiateProviderService(String keystore, String parameters) {
+        String[] split = this.extractingKeystoreAndClassName(keystore);
         try {
-            Class<?> clazz = Class.forName(fullyQualifiedName);
-            switch(clazz.getSimpleName()){
-                case "CustomProviderService":
-                    logger.info("Instantiating CustomProviderService");
-                    Object obj = this.instantiateCustomProviderService(clazz, keystore, parameters);
-                    return (SigningService) obj;
-                default: return null;
-            }
-
+            Class<?> clazz = Class.forName(split[1]);
+            Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, String.class);
+            return (SigningService) constructor.newInstance(split[0], parameters);
         } catch (Exception e) {
             logger.severe("Failed to instantiate CustomProviderService: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    public SigningService instantiateCustomProviderService(Class<?> clazz, String keystore, String[] parameters) throws NoSuchMethodException, NotABooleanValueException, NotACorrectIntegerValueException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, String.class, String.class, int.class, boolean.class, String.class, String.class, String.class, String.class);
-        boolean nonDecorateSignature;
-        int saltLength;
-        logger.info("Verifying the values of non decorate signature parameters");
-        if(checker.checkIfBoolean(parameters[3])) {
-            nonDecorateSignature = Boolean.parseBoolean(parameters[3]);
+    public String[] extractingKeystoreAndClassName(String keystore) {
+        if (keystore.split("\\|").length != 2 || this.checkIfStringisEmpty(keystore.split("\\|"))) {
+            throw new IllegalArgumentException("Invalid keystore format: " + keystore);
         }else {
-            logger.severe("The value of non decorate signature is not a boolean value");
-            throw new NotABooleanValueException("The value of non decorate signature is not a boolean value");
+            String[] split = keystore.split("\\|");
+            return split;
         }
-        logger.info("Verifying the values of salt length parameters");
-        if(checker.checkIfInteger(parameters[2])) {
-            saltLength = Integer.parseInt(parameters[2]);
-        }
-        else{
-            logger.severe("The value of salt length is not an integer value");
-            throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
-        }
-        return (SigningService) constructor.newInstance(keystore, parameters[0], parameters[1], saltLength, nonDecorateSignature, parameters[4], parameters[5], parameters[6], parameters[7]);
     }
 
+    private boolean checkIfStringisEmpty(String[] values) {
+        for (String value : values) {
+            if (value.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

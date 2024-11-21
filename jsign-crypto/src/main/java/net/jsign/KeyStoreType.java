@@ -106,29 +106,33 @@ public enum KeyStoreType {
      *
      * Usage:
      *   --storetype CUSTOMPROVIDER
-     *   --keystore <API endpoint URL>
+     *   --keystore <API endpoint URL>|<full class name of provider service>
      *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
      */
     CUSTOMPROVIDER(false, false, false) {
-        ParameterChecker checker = new ParameterChecker();
+        //ParameterChecker checker = new ParameterChecker();
+        SigningServiceJcaProvider provider;
         Logger logger = Logger.getLogger(this.getClass().getName());
         CustomProviderServiceInstantiation instantiationService = new CustomProviderServiceInstantiation();
-        String fullyQualifiedClassName = "net.jsign.jca.CustomProviderService";
+
+
         @Override
         void validate(KeyStoreBuilder params) {
+            String fullyQualifiedClassName = params.storepass();
             logger.info("Validating CUSTOMPROVIDER keystore parameters");
-            if (params.storepass() == null || params.storepass().split("\\|").length != 8 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
-                logger.severe("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
-                logger.severe("storepass: " + params.storepass());
-                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
-            }
+            SigningService signingService = instantiationService.instantiateProviderService(params.keystore(), params.storepass());
+            provider = new SigningServiceJcaProvider(signingService);
         }
 
         @Override
         Provider getProvider(KeyStoreBuilder params) {
-            String[] elements = params.storepass().split("\\|");
-            return new SigningServiceJcaProvider(instantiationService.instantiateProviderService(fullyQualifiedClassName, params.keystore(), elements));
-            //return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+            try {
+                return provider;
+            } catch (NullPointerException e) {
+                logger.severe("Failed to instantiate CustomProviderService: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+
         }
 
         @Override
@@ -140,7 +144,7 @@ public enum KeyStoreType {
         KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
             try {
                 logger.info("Initializing KeyStore for CUSTOMPROVIDER");
-                logger.info("Endpoint: " + params.keystore());
+                logger.info("Endpoint: " + params.keystore().split("\\|")[0]);
                 logger.info("Storepass: " + (params.storepass() != null ? "Provided" : "Not Provided"));
 
                 KeyStore ks = KeyStore.getInstance("SigningService", provider);
