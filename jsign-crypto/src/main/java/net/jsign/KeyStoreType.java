@@ -35,9 +35,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
-import net.jsign.instantiation.CustomProviderServiceInstantiation;
+import net.jsign.instantiation.CustomProviderInstantiationService;
 import net.jsign.jca.*;
-import net.jsign.util.ParameterChecker;
 
 /**
  * Type of a keystore.
@@ -113,12 +112,11 @@ public enum KeyStoreType {
         //ParameterChecker checker = new ParameterChecker();
         SigningServiceJcaProvider provider;
         Logger logger = Logger.getLogger(this.getClass().getName());
-        CustomProviderServiceInstantiation instantiationService = new CustomProviderServiceInstantiation();
+        CustomProviderInstantiationService instantiationService = new CustomProviderInstantiationService();
 
 
         @Override
         void validate(KeyStoreBuilder params) {
-            String fullyQualifiedClassName = params.storepass();
             logger.info("Validating CUSTOMPROVIDER keystore parameters");
             SigningService signingService = instantiationService.instantiateProviderService(params.keystore(), params.storepass());
             provider = new SigningServiceJcaProvider(signingService);
@@ -126,11 +124,12 @@ public enum KeyStoreType {
 
         @Override
         Provider getProvider(KeyStoreBuilder params) {
-            try {
+            if(provider != null) {
                 return provider;
-            } catch (NullPointerException e) {
-                logger.severe("Failed to instantiate CustomProviderService: " + e.getMessage());
-                throw new RuntimeException(e);
+            } else {
+                String message = "Failed to instantiate CustomProviderService! Provider was null.";
+                logger.severe(message);
+                throw new RuntimeException(message);
             }
 
         }

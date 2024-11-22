@@ -37,6 +37,12 @@
       <artifactId>jsign-cli</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>net.jsign</groupId>
+      <artifactId>jsign-custom-signer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

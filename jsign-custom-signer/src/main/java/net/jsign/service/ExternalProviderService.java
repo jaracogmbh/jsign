@@ -1,4 +1,4 @@
-package net.jsign.jca;
+package net.jsign.service;
 
 import net.jsign.DigestAlgorithm;
 import net.jsign.exception.FailedCertificateExtractionException;
@@ -6,6 +6,9 @@ import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
+import net.jsign.jca.CustomProviderService;
+import net.jsign.jca.SigningService;
+import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.Chain;
 import net.jsign.model.SignatureResponse;
@@ -33,7 +36,7 @@ import java.util.logging.Logger;
 public class ExternalProviderService implements SigningService, CustomProviderService {
     CertificateService certificateService;
     ParameterChecker checker = new ParameterChecker();
-    private final Logger logger = Logger.getLogger(DigiCertOneSigningService.class.getName());
+    private final Logger logger = Logger.getLogger(ExternalProviderService.class.getName());
 
     String parameters;
     private final String alias = "default";

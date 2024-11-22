@@ -6,9 +6,9 @@ import net.jsign.jca.SigningService;
 import java.lang.reflect.Constructor;
 import java.util.logging.Logger;
 
-public class CustomProviderServiceInstantiation {
+public class CustomProviderInstantiationService {
 
-    Logger logger = Logger.getLogger(CustomProviderServiceInstantiation.class.getName());
+    Logger logger = Logger.getLogger(CustomProviderInstantiationService.class.getName());
 
     public SigningService instantiateProviderService(String keystore, String parameters) {
         String[] split = this.extractingKeystoreAndClassName(keystore);
@@ -17,8 +17,9 @@ public class CustomProviderServiceInstantiation {
             Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, String.class);
             return (SigningService) constructor.newInstance(split[0], parameters);
         } catch (Exception e) {
-            logger.severe("Failed to instantiate CustomProviderService: " + e.getMessage());
-            throw new RuntimeException(e);
+            String message = "Failed to instantiate CustomProviderService: " + e.getMessage();
+            logger.severe(message);
+            throw new RuntimeException(message, e);
         }
     }
 
@@ -39,4 +40,5 @@ public class CustomProviderServiceInstantiation {
         }
         return false;
     }
+
 }

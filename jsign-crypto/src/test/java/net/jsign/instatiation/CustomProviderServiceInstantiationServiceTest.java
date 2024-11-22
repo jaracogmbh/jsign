@@ -1,51 +1,67 @@
-/*
+
 package net.jsign.instatiation;
 
-import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.instantiation.CustomProviderServiceInstantiation;
-import net.jsign.testModel.CustomProviderService;
+import net.jsign.instantiation.CustomProviderInstantiationService;
+
+import net.jsign.testModel.TestProviderService;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class CustomProviderServiceInstantiationServiceTest {
 
-    CustomProviderServiceInstantiation underTest = new CustomProviderServiceInstantiation();
+    CustomProviderInstantiationService underTest = new CustomProviderInstantiationService();
 
     @Test
     public void instantiateProviderServiceTest(){
-        String fullyQualifiedName = "net.jsign.testModel.CustomProviderService";
-        String keystore = "keystore";
-        String[] parameters = new String[]{"param1", "blaa", "32", "true", "param4", "param5", "param6", "param7"};
-        CustomProviderService result = (CustomProviderService) underTest.instantiateProviderService(fullyQualifiedName, keystore, parameters);
-        System.out.println(result.getName());
-        assertEquals("CustomProviderService", result.getName());
-        assertEquals(CustomProviderService.class, result.getClass());
+        String keystore = "keystore|net.jsign.testModel.TestProviderService";
+        String parameters = "apikey|password";
+        TestProviderService result = (TestProviderService) underTest.instantiateProviderService(keystore, parameters);
+        System.out.println(result.getClass());
+        assertEquals(TestProviderService.class, result.getClass());
+        assertEquals("apikey", result.getApiKey());
+        assertEquals("password", result.getPassword());
+        assertEquals("keystore", result.getEndpoint());
     }
 
     @Test
-    public void instatiateProviderServiceTestFailed() throws ClassNotFoundException {
-        String fullyQualifiedName = "net.jsign.testModel.CustomProviderService";
-        String keystore = "keystore";
-        Class<?> clazz =  Class.forName(fullyQualifiedName);
-        String[] parameters = new String[]{"param1", "blaa", "32o", "true", "param4", "param5", "param6", "param7"};
-        Exception e = assertThrows(NotACorrectIntegerValueException.class, () -> {
-            underTest.instantiateCustomProviderService(clazz, keystore, parameters);
-        });
-        assertEquals("The value of salt length is not an integer value", e.getMessage());
+    public void extractingKeystoreAndClassNameTest(){
+        String keystore = "keystore|net.jsign.testModel.TestProviderService";
+        String[] result = underTest.extractingKeystoreAndClassName(keystore);
+        assertEquals("keystore", result[0]);
+        assertEquals("net.jsign.testModel.TestProviderService", result[1]);
     }
 
     @Test
-    public void instatiateProviderServiceTestFailed2() throws ClassNotFoundException {
-        String fullyQualifiedName = "net.jsign.testModel.CustomProviderService";
-        String keystore = "keystore";
-        Class<?> clazz =  Class.forName(fullyQualifiedName);
-        String[] parameters = new String[]{"param1", "blaa", "32", "truee", "param4", "param5", "param6", "param7"};
-        Exception e = assertThrows(NotABooleanValueException.class, () -> {
-            underTest.instantiateCustomProviderService(clazz, keystore, parameters);
+    public void extractingKeystoreAndClassNameTestFailed(){
+        String keystore = "keystore|";
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.extractingKeystoreAndClassName(keystore);
         });
-        assertEquals("The value of non decorate signature is not a boolean value", e.getMessage());
+        assertEquals("Invalid keystore format: " + keystore, e.getMessage());
     }
+    @Test
+    public void extractingKeystoreAndClassNameTestFailed2(){
+        String keystore = "|net.jsign.testModel.TestProviderService";
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.extractingKeystoreAndClassName(keystore);
+        });
+        assertEquals("Invalid keystore format: " + keystore, e.getMessage());
+    }
+
+    @Test
+    public void instantiateProviderServiceTestFailed() {
+        String keystore = "keystore|net.jsign.testModel.EndpointProviderService";
+        String parameters = "apikey|password";
+        Exception e = assertThrows(RuntimeException.class, () -> {
+            underTest.instantiateProviderService(keystore, parameters);
+        });
+        System.out.println(e.getMessage());
+        System.out.println(e.getCause());
+        assertEquals("Failed to instantiate CustomProviderService: net.jsign.testModel.EndpointProviderService", e.getMessage());
+        assertEquals("java.lang.ClassNotFoundException: net.jsign.testModel.EndpointProviderService", e.getCause().toString());
+    }
+
+
 }
-*/
+

@@ -7,7 +7,7 @@ import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.jca.ExternalProviderService;
+import net.jsign.service.ExternalProviderService;
 import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.Chain;

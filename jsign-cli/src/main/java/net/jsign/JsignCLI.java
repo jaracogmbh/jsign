@@ -52,20 +52,18 @@ import static org.apache.commons.io.ByteOrderMark.*;
  */
 public class JsignCLI {
 
-    //String fullyQualifiedClassName = "net.jsign.jca.CustomProviderService";
     public static void main(String... args) {
         try {
             String[] test = new String[]{
-                    "-keystorehttp://localhost:8089|net.jsign.jca.ExternalProviderService",
+                    "-keystorehttp://localhost:8089|net.jsign.service.ExternalProviderService",
                     "-storetypeCUSTOMPROVIDER",
                     "-aliasjsign-2022-key",
                     "-keypasspassword123",
                     "-storepassSHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password123456",
-                    //"-storepass|||||||",
                     "-tsaurlhttp://timestamp.digicert.com",
                     "psftp.exe"
             };
-            new JsignCLI().execute(test);
+            new JsignCLI().execute(args);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());
             if (e.getCause() != null) {

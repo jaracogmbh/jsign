@@ -56,8 +56,7 @@
     <module>jsign</module>
     <module>jsign-maven-plugin</module>
     <module>jsign-gradle-plugin</module>
-      <module>jsign-custom-signer</module>
-      <module>jsign-commons</module>
+    <module>jsign-custom-signer</module>
   </modules>
 
   <dependencies>
