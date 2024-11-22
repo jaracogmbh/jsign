@@ -6,7 +6,7 @@ import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.jca.CustomProviderService;
+import net.jsign.jca.CustomProviderServiceInterface;
 import net.jsign.jca.SigningService;
 import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * Custom signing service implementation for a mock API.
  */
-public class ExternalProviderService implements SigningService, CustomProviderService {
+public class ExternalProviderService implements SigningService, CustomProviderServiceInterface {
     CertificateService certificateService;
     ParameterChecker checker = new ParameterChecker();
     private final Logger logger = Logger.getLogger(ExternalProviderService.class.getName());

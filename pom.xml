@@ -50,13 +50,14 @@
 
   <modules>
     <module>jsign-crypto</module>
+    <module>jsign-custom-signer</module>
     <module>jsign-core</module>
     <module>jsign-ant</module>
     <module>jsign-cli</module>
     <module>jsign</module>
     <module>jsign-maven-plugin</module>
     <module>jsign-gradle-plugin</module>
-    <module>jsign-custom-signer</module>
+
   </modules>
 
   <dependencies>

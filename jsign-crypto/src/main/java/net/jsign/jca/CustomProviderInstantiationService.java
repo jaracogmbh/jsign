@@ -1,7 +1,5 @@
-package net.jsign.instantiation;
+package net.jsign.jca;
 
-
-import net.jsign.jca.SigningService;
 
 import java.lang.reflect.Constructor;
 import java.util.logging.Logger;

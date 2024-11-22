@@ -1,7 +1,6 @@
 package net.jsign.testModel;
 
-import net.jsign.instantiation.CustomProviderInstantiationService;
-import net.jsign.jca.CustomProviderService;
+import net.jsign.jca.CustomProviderServiceInterface;
 import net.jsign.jca.SigningService;
 import net.jsign.jca.SigningServicePrivateKey;
 
@@ -12,7 +11,7 @@ import java.security.cert.Certificate;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class TestProviderService implements SigningService, CustomProviderService {
+public class TestProviderService implements SigningService, CustomProviderServiceInterface {
     Logger logger = Logger.getLogger(TestProviderService.class.getName());
 
     String endpoint;

@@ -37,12 +37,6 @@
       <artifactId>jsign-cli</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>net.jsign</groupId>
-      <artifactId>jsign-custom-signer</artifactId>
-      <version>${project.version}</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -99,7 +93,7 @@
                 </excludes>
               </artifactSet>
               <filters>
-                <filter>
+               <!-- <filter>
                   <artifact>*:*</artifact>
                   <excludes>
                     <exclude>META-INF/*</exclude>
@@ -118,7 +112,7 @@
                     <exclude>**/bouncycastle/crypto/digests/Tiger**</exclude>
                     <exclude>**/bouncycastle/crypto/digests/GOST**</exclude>
                   </excludes>
-                </filter>
+                </filter>-->
                 <filter>
                   <artifact>*:*</artifact>
                   <excludeDefaults>false</excludeDefaults>
@@ -200,6 +194,7 @@
                 <option>-keep public class * implements net.jsign.spi.SignableProvider { *; }</option>
                 <option>-keeppackagenames net.jsign</option>
                 <option>-keepclassmembers class * extends java.lang.Enum { *; }</option>
+                <option>-keep class net.jsign.**{*;}</option>
               </options>
               <injar>${project.build.finalName}.jar</injar>
               <includeDependency>true</includeDependency>

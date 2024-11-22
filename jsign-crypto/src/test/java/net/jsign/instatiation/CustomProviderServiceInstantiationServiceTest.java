@@ -1,7 +1,7 @@
 
 package net.jsign.instatiation;
 
-import net.jsign.instantiation.CustomProviderInstantiationService;
+import net.jsign.jca.CustomProviderInstantiationService;
 
 import net.jsign.testModel.TestProviderService;
 import org.junit.Test;

@@ -35,7 +35,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
-import net.jsign.instantiation.CustomProviderInstantiationService;
+import net.jsign.jca.CustomProviderInstantiationService;
 import net.jsign.jca.*;
 
 /**
