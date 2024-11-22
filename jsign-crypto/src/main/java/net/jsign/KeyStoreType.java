@@ -35,12 +35,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
-import net.jsign.exception.NoEndpointSpecifiedException;
-import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.instantiation.CustomProviderServiceInstantiation;
+import net.jsign.jca.CustomProviderInstantiationService;
 import net.jsign.jca.*;
-import net.jsign.util.ParameterChecker;
 
 /**
  * Type of a keystore.
@@ -109,46 +105,33 @@ public enum KeyStoreType {
      *
      * Usage:
      *   --storetype CUSTOMPROVIDER
-     *   --keystore <API endpoint URL>
+     *   --keystore <API endpoint URL>|<full class name of provider service>
      *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
      */
     CUSTOMPROVIDER(false, false, false) {
-        ParameterChecker checker = new ParameterChecker();
+        //ParameterChecker checker = new ParameterChecker();
+        SigningServiceJcaProvider provider;
         Logger logger = Logger.getLogger(this.getClass().getName());
-        CustomProviderServiceInstantiation instantiationService = new CustomProviderServiceInstantiation();
-        String fullyQualifiedClassName = "net.jsign.jca.CustomProviderService";
+        CustomProviderInstantiationService instantiationService = new CustomProviderInstantiationService();
+
+
         @Override
         void validate(KeyStoreBuilder params) {
             logger.info("Validating CUSTOMPROVIDER keystore parameters");
-            if (params.storepass() == null || params.storepass().split("\\|").length != 8 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
-                logger.severe("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
-                logger.severe("storepass: " + params.storepass());
-                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
-            }
+            SigningService signingService = instantiationService.instantiateProviderService(params.keystore(), params.storepass());
+            provider = new SigningServiceJcaProvider(signingService);
         }
 
         @Override
-        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
-            String[] elements = params.storepass().split("\\|");
-            boolean nonDecorateSignature;
-            int saltLength;
-            logger.info("Verifying the values of non decorate signature parameters");
-            if(checker.checkIfBoolean(elements[3])) {
-                nonDecorateSignature = Boolean.parseBoolean(elements[3]);
-            }else {
-                logger.severe("The value of non decorate signature is not a boolean value");
-                throw new NotABooleanValueException("The value of non decorate signature is not a boolean value");
+        Provider getProvider(KeyStoreBuilder params) {
+            if(provider != null) {
+                return provider;
+            } else {
+                String message = "Failed to instantiate CustomProviderService! Provider was null.";
+                logger.severe(message);
+                throw new RuntimeException(message);
             }
-            logger.info("Verifying the values of salt length parameters");
-            if(checker.checkIfInteger(elements[2])) {
-                saltLength = Integer.parseInt(elements[2]);
-            }
-            else{
-                logger.severe("The value of salt length is not an integer value");
-                throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
-            }
-            return new SigningServiceJcaProvider(instantiationService.instantiateProviderService(fullyQualifiedClassName, params.keystore(), elements));
-            //return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+
         }
 
         @Override
@@ -160,7 +143,7 @@ public enum KeyStoreType {
         KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
             try {
                 logger.info("Initializing KeyStore for CUSTOMPROVIDER");
-                logger.info("Endpoint: " + params.keystore());
+                logger.info("Endpoint: " + params.keystore().split("\\|")[0]);
                 logger.info("Storepass: " + (params.storepass() != null ? "Provided" : "Not Provided"));
 
                 KeyStore ks = KeyStore.getInstance("SigningService", provider);
@@ -645,7 +628,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
+    Provider getProvider(KeyStoreBuilder params){
         return null;
     }
 

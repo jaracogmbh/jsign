@@ -1,8 +1,9 @@
-package net.jsign.util;
+package util;
 
 import net.jsign.exception.JsonResponseIncorrectException;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.SignatureResponse;
+import net.jsign.util.CertificateUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

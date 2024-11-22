@@ -1,0 +1,9 @@
+{
+  "signTime": 12354567789098664,
+  "signedHash": "v686SHskn4n/gDM0lLLzCRpKWbaKxZNGdtrNXncFVjM/EO+c7kudD/5ZlGuQPVgw1qK/QN/PUtdNl6LyIqI96UJ30czyoK96XoqNHOFxMsSZmoSzfzRqGhs9jayek4exTvJBs9UgdXamKi+1G/C56g9awtxydBpj2F2Iq+1BbCqOAEtx4PMo1+8syecmWg9cQMAU0skhG2Ve42d4xay3Mci3/QAiXUTpSRVW3EEvp9O+MQR9nl501VbBCU1cLuaA5Aa9JY13pHjvBMiGftC6R2/eJLG+hhcDzplC0Ni+GnXYpU0/b3ejhoHA2oU8IBXwcNnrkSXirmEneM6zqgAeQYwpAKFmhh9x37DbPunJflsf6lDYdQra2SqYZ2LkD9AIYBJZCEdAZGUtPCDWdVGHlfAAIA7hi63O6mXyhoUgSAELWV15zTo6i+JgfLjuw1UwqKSE6/RCuk6AY27LgvBdbEYq9tIwf9bqhMz8Dgse9gvslYheDTq+ZrWNEMzQ/U5a",
+  "validUntil": "2030-11-23T18:25:43.511Z",
+  "certificateId": "353d4f18-4b78-b17c-5325-f92375cf40ec",
+  "signCertificate": "a68e1ae4-41ac-b140-ad1e-3219ff08a4e9",
+  "signReturnCode" : "SUCCESS",
+  "errorMessage" : null
+}

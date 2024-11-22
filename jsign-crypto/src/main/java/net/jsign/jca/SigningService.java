@@ -16,8 +16,6 @@
 
 package net.jsign.jca;
 
-import net.jsign.exception.FailedSignatureExtractionException;
-import net.jsign.exception.SignRequestFailedException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.UnrecoverableKeyException;
@@ -73,5 +71,5 @@ public interface SigningService {
      * @param algorithm  the signing algorithm (for example SHA256withRSA)
      * @param data       the data to be signed
      */
-    byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException, FailedSignatureExtractionException, SignRequestFailedException;
+    byte[] sign(SigningServicePrivateKey privateKey, String algorithm, byte[] data) throws GeneralSecurityException;
 }

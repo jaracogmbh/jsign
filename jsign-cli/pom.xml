@@ -45,6 +45,12 @@
       <version>1.1.2</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>net.jsign</groupId>
+      <artifactId>jsign-custom-signer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

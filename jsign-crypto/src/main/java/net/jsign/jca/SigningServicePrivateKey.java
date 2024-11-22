@@ -58,7 +58,7 @@ public class SigningServicePrivateKey implements PrivateKey {
      * @param algorithm The algorithm of the key (RSA or ECDSA)
      * @param service   The signing service
      */
-    SigningServicePrivateKey(String id, String algorithm, SigningService service) {
+    public SigningServicePrivateKey(String id, String algorithm, SigningService service) {
         this(id, algorithm);
         this.service = service;
     }

@@ -45,9 +45,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import net.jsign.exception.NoEndpointSpecifiedException;
-import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotACorrectIntegerValueException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -324,7 +321,7 @@ class SignerHelper {
         }
     }
 
-    private AuthenticodeSigner build() throws SignerException, NotACorrectIntegerValueException, NotABooleanValueException, NoEndpointSpecifiedException {
+    private AuthenticodeSigner build() throws SignerException{
         KeyStore ks;
         try {
             ks = ksparams.build();

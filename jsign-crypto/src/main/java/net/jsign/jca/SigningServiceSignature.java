@@ -16,8 +16,7 @@
 
 package net.jsign.jca;
 
-import net.jsign.exception.FailedSignatureExtractionException;
-import net.jsign.exception.SignRequestFailedException;
+
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
@@ -46,7 +45,7 @@ class SigningServiceSignature extends AbstractSignatureSpi {
     protected byte[] engineSign() throws SignatureException {
         try {
             return privateKey.getService().sign(privateKey, signingAlgorithm, buffer.toByteArray());
-        } catch (GeneralSecurityException | FailedSignatureExtractionException | SignRequestFailedException e) {
+        } catch (GeneralSecurityException e) {
             throw new SignatureException(e);
         }
     }
