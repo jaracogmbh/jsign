@@ -1,7 +1,7 @@
 # Projekt für einen Custom Signer Provider
 
 ## Overview
-This Project creates a Custom Signing Service that allows us to sign a file via an external API. The external API provides the certificate and the signature. The signature is then inserted into the file and the signed file is returned. The Custom Signer Provider is compatible with the ``jsign`` program.
+This Project creates a Custom Signing Service that allows us to sign a file via an external API. The external API provides the certificate and the signature. The signature is then inserted into the file and the signed file is returned. The custom signing service is compatible with the ``jsign`` program.
 
 
 ## Idea behind the Project
@@ -26,7 +26,7 @@ This section describes the input parameters that are required to run the Custom 
 
 ### ``storetype`` Parameter
 
-The ``storetype`` parameter is a string that specifies the type of the KeyStore. In this case, the type is ``CUSTOMPROVIDER``. This parameter is necessary so that the program knows that it is the ``Custom Provider Service``.
+The ``storetype`` parameter is a string that specifies the type of the keystore that is used. In this case, the type is ``CUSTOMPROVIDER``. This parameter is necessary so that the program knows to use the custom signing service.
 
 ### ```storepass``` Parameter
 
@@ -44,14 +44,8 @@ The ``storepass`` parameter is a string that contains the following information:
 - ``auth``: Authentication for the Basic Authentication via the HTTP Header
 
 #### Structure of the ``storepass`` Parameters
-Da relativ viele Informationen in einem String übergeben werden müssen, ist es wichtig, dass die Informationen in der richtigen Reihenfolge und mit dem richtigen Trennzeichen übergeben werden. Das Trennzeichen ist der ``|``. Die Reihenfolge der Informationen ist wie folgt:
 
-```
-<signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
-```
-Auperdem ist zu beachten, dass leere Werte (``||``) nicht erlaubt sind. Hier wird dann ein Fehler geworfen und das Programm wird beendet. Auch müssen alle Werte gesetzt werden.
-
-Since relatively many information must be passed in a string, it is important that the information is passed in the correct order and with the correct delimiter. The delimiter is the ``|``. The order of the information is as follows:
+Since a lot of information must be passed in a string, it is important that the information is passed in the correct order and with the correct delimiter. The delimiter is the ``|``. The order of the information is as follows:
 
 ```
 <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
@@ -70,30 +64,71 @@ Both the certificate and the signature are determined or created via an API. The
 
 The other part of the ``keystore`` parameter is the full class name of the Custom Signing Service class. With the class name the Custom Signing Service is instantiated in the ``jsign`` program.
 
-## Was muss in ``jsign`` geändert werden?
+#### Example for the ``keystore`` parameter
+``` 
+http://localhost:8089|net.jsign.service.ExternalSigningService
+```
 
-Um zu ermöglichen, dass Custom Signing Provider in ``jsign`` verwendet werden können, mussten einige Änderungen im ``jsign-crypto`` Projekt vorgenommen werden.
+### ``JAR`` File for the Custom Signing Service and ``jsign``
 
-1. Registrierung der Provider zur Laufzeit.
-    - Um einen eigenen Provider verwenden zu können, muss dieser registiert werden. Dafür wurde die Klasse ``SigningServiceJcaProvider``, so geändert dass die Provider zur Laufzeit registriert werden können.
-2. Hinzunahme eines Weiteren Typen im ``KeyStoreType`` Enum
-    - Der ``KeyStoreType`` Enum wurde um einen weiteren Typen erweitert. ``CUSTOMPROVIDER`` soll den Typen für einen Custom Provider Service darstellen. Mit diesem Typen kann der ``jsign`` Programm erkennen, dass ein Custom Provider verwendet wird.
-3. ``CustomProviderSigningInterface`` und ``CustomProviderInstantiationService``
-    - Um einen Custom Provider verwenden zu können, muss dieser das ``CustomProviderSigningInterface`` implementieren. Dieses Interface ist für die Validierung und das Erstellen des Custom Digning Providers zuständig. Der ``CustomProviderInstantiationService`` ist für die Instanzierung des Custom Providers zuständig.
+When using a custom signing service, the ``JAR`` file of the custom signing service will be passed to the ``jsign`` program via classpath. For that to work we need to create a ``FAT JAR`` file that contains all the dependencies of the custom signing service.
 
-### Instanziierung von Custom Singning Services
-Die Instanziierung der Custom Signing Services erfolgt über die ``CustomProviderInstantiationService`` Klasse. Die Klasse verwendet die Reflection API, um die Custom Signing Services zu instanzieren. Das bedeutet die Custom Signing Service werden über den Namen der Klasse instanziiert.
-
-Alle Custom Signing Services müssen das ``CustomProviderSigningInterface`` implementieren und einen Konstruktor mit zwei String Parametern haben. 
+The same applies to the ``jsign`` program. The ``jsign`` program must also be passed as a ``FAT JAR``.
 
 ### Running via the Command Line
 
-- Example:
+- Example Linux:
 
 ```
+java -cp "jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar:jaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar" net.jsign.JsignCLI --storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" --keystore "http://localhost:8089|net.jsign.service.ExternalSigningService" --alias test --storetype CUSTOMPROVIDER psftp.exe
 ```
 
+- Example Windows:
 
+```
+java -cp "jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar;jaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar" net.jsign.JsignCLI --storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" --keystore "http://localhost:8089|net.jsign.service.ExternalSigningService" --alias test --storetype CUSTOMPROVIDER psftp.exe
+```
+
+## Running with ``jarsigner`` via the Command Line
+
+Since ``jsign`` cannot sign ``.JAR`` files, ``jarsigner`` is used in combination with ``jsign``. This signs the ``.JAR`` file and the signature is passed to the custom Signing Service via ``jsign``.
+
+- Example Linux:
+
+```
+jarsigner -J-cp -Jjaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar:jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089|net.jsign.service.ExternalSigningService" -keystore NONE -sigalg SHA256withRSA -digestalg SHA-256 application_original.jar test
+```
+
+- Example Windows:
+
+```
+jarsigner -J-cp -Jjaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar;jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089|net.jsign.service.ExternalSigningService" -keystore NONE -sigalg SHA256withRSA -digestalg SHA-256 application_original.jar test
+```
+
+### Bemerkungen bei der Ausführung mit ``jarsigner``:
+- zu beachten:
+  - der `keystore` Parameter muss auf ``NONE`` gesetzt werden
+  - der Endpunkt wird über den ``providerArg`` Parameter übergeben
+    - dieser Parameter ist notwendig, damit ``jarsigner`` weiß, dass es sich um den ``Custom Provider Service`` handelt.
+    - außerdem ist dieser Parameter nicht nativ in ``jsign`` vorhanden, sonder nur in Kombination mit ``jarsigner``.
+- Zusätzliche Flags:
+  - ``sigalg``: Signatur Algorithmus
+  - ``digestalg``: Digest Algorithmus
+  - diese beiden Flags müssen gesetzt werden, da ``jarsigner`` sonst nicht den richtigen Algorithmus für die Signature benutzt.
+- letzter Parameter ist der ``alias``. Dieser muss zwingend an letzter Stelle stehen.
+- Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen, weshalb die Warnung ignoriert werden kann.
+
+- to be noted:
+  - the `keystore` parameter must be set to ``NONE``
+  - the endpoint and class name are passed via the ``providerArg`` parameter
+    - this parameter is necessary so that ``jarsigner`` knows that it is the Custom Signing Service
+  - also this parameter is only available in combination with ``jarsigner`` and not natively in ``jsign``
+  - Additional Flags:
+    - ``sigalg``: Signature Algorithm
+    - ``digestalg``: Digest Algorithm
+    - these two flags must be set, otherwise ``jarsigner`` will not use the correct algorithm for the signature
+  - the last parameter is the ``alias``. This must be set at the last position.
+  - If we do not specify a ``tsurl`` flag in ``Jarsigner``, we get a warning. Since the API takes care of creating the signature, it is not necessary to set the ``tsurl`` flag, so the warning can be ignored.
 
 
 

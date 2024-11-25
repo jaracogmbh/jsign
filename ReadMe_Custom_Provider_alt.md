@@ -48,7 +48,7 @@ Sowohl das Certifikat als auch die Signature werden über eine API ermittelt bzw
 - Beispiel:
 
 ```
-java -jar jsign-7.0-SNAPSHOT.jar --storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" --keystore http://localhost:8089 --alias test --storetype CUSTOMPROVIDER psftp.exe 
+java -cp "jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar:jaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar" net.jsign.JsignCLI --storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" --keystore "http://localhost:8089|net.jsign.service.ExternalSigningService" --alias test --storetype CUSTOMPROVIDER psftp.exe
 ```
 ## Ausführung mit ``jarsigner`` über die Kommando Zeile
 
@@ -57,14 +57,14 @@ Da ``jsign`` keine ``.JAR`` Dateien signieren kann, wird ``jarsigner`` in Kommbi
 - Beispiel:
 
 ```
- jarsigner -J-cp -Jjsign-7.0-SNAPSHOT.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089" -keystore NONE -sigalg SHA256withRSA -digestalg SHA-256 application_original.jar test 
+jarsigner -J-cp -Jjaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar:jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar  -J--add-modules -Jjava.net.http -storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user|password12345" -storetype CUSTOMPROVIDER -providerClass net.jsign.jca.JsignJcaProvider -providerArg "http://localhost:8089|net.jsign.service.ExternalSigningService" -keystore NONE -sigalg SHA256withRSA -digestalg SHA-256 application_original.jar test
 ```
 
 
 ### Bemerkungen bei der Ausführung mit ``jarsigner``: 
 - zu beachten:
   - der `keystore` Parameter muss auf ``NONE`` gesetzt werden
-  - der Endpunkt wird über den ``providerArg`` Parameter übergeben
+  - der Endpunkt und der Klassenname werden über den ``providerArg`` Parameter übergeben
     - dieser Parameter ist notwendig, damit ``jarsigner`` weiß, dass es sich um den ``Custom Provider Service`` handelt.
     - außerdem ist dieser Parameter nicht nativ in ``jsign`` vorhanden, sonder nur in Kombination mit ``jarsigner``.
 - Zusätzliche Flags:
