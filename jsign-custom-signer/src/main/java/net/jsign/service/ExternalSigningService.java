@@ -6,7 +6,7 @@ import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.jca.CustomProviderInstantiationService;
+import net.jsign.jca.CustomSigningServiceInterface;
 import net.jsign.jca.SigningService;
 import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
@@ -33,10 +33,10 @@ import java.util.logging.Logger;
 /**
  * Custom signing service implementation for a mock API.
  */
-public class ExternalProviderService implements SigningService, CustomProviderInstantiationService.CustomProviderServiceInterface {
+public class ExternalSigningService implements SigningService, CustomSigningServiceInterface {
     CertificateService certificateService;
     ParameterChecker checker = new ParameterChecker();
-    private final Logger logger = Logger.getLogger(ExternalProviderService.class.getName());
+    private final Logger logger = Logger.getLogger(ExternalSigningService.class.getName());
 
     String parameters;
     private final String alias = "default";
@@ -51,14 +51,14 @@ public class ExternalProviderService implements SigningService, CustomProviderIn
     String user;
     String auth;
 
-    public ExternalProviderService(String keystore, String parameters){
+    public ExternalSigningService(String keystore, String parameters){
         HttpClient client = HttpClient.newHttpClient();
         this.certificateService = new CertificateService(client);
         this.init(keystore, parameters);
     }
 
     // For testing purposes
-    public ExternalProviderService(String keystore, String parameters, CertificateService certificateService){
+    public ExternalSigningService(String keystore, String parameters, CertificateService certificateService){
         this.certificateService = certificateService;
         this.init(keystore, parameters);
     }
@@ -76,15 +76,15 @@ public class ExternalProviderService implements SigningService, CustomProviderIn
      * @param auth
      * @throws NoEndpointSpecifiedException
      */
-    public ExternalProviderService(String endpoint,
-                                   String signAlgorithm,
-                                   String mgfAlgorithm,
-                                   int saltLength,
-                                   boolean nonDecorateSignature,
-                                   String group,
-                                   String serviceId,
-                                   String user,
-                                   String auth) {
+    public ExternalSigningService(String endpoint,
+                                  String signAlgorithm,
+                                  String mgfAlgorithm,
+                                  int saltLength,
+                                  boolean nonDecorateSignature,
+                                  String group,
+                                  String serviceId,
+                                  String user,
+                                  String auth) {
         HttpClient client = HttpClient.newHttpClient();
         certificateService = new CertificateService(client);
         logger.info("Initializing CustomProviderService with endpoint: " + endpoint);
@@ -110,16 +110,16 @@ public class ExternalProviderService implements SigningService, CustomProviderIn
     }
 
     // For testing purposes
-    public ExternalProviderService(CertificateService certificateService,
-                                   String endpoint,
-                                   String signAlgorithm,
-                                   String mgfAlgorithm,
-                                   int saltLength,
-                                   boolean nonDecorateSignature,
-                                   String group,
-                                   String serviceId,
-                                   String user,
-                                   String auth) {
+    public ExternalSigningService(CertificateService certificateService,
+                                  String endpoint,
+                                  String signAlgorithm,
+                                  String mgfAlgorithm,
+                                  int saltLength,
+                                  boolean nonDecorateSignature,
+                                  String group,
+                                  String serviceId,
+                                  String user,
+                                  String auth) {
         this.certificateService = certificateService;
         logger.info("Initializing CustomProviderService with endpoint: " + endpoint);
         logger.info("Setting endpoint to: " + endpoint);
@@ -143,7 +143,7 @@ public class ExternalProviderService implements SigningService, CustomProviderIn
         logger.info("auth was successfully set");
     }
 
-    public ExternalProviderService(CertificateService certificateService){
+    public ExternalSigningService(CertificateService certificateService){
         this.certificateService = certificateService;
 
     }

@@ -55,7 +55,7 @@ public class JsignCLI {
     public static void main(String... args) {
         try {
             String[] test = new String[]{
-                    "-keystorehttp://localhost:8089|net.jsign.service.ExternalProviderService",
+                    "-keystorehttp://localhost:8089|net.jsign.service.ExternalSigningService",
                     "-storetypeCUSTOMPROVIDER",
                     "-aliasjsign-2022-key",
                     "-keypasspassword123",

@@ -4,9 +4,9 @@ package net.jsign.jca;
 import java.lang.reflect.Constructor;
 import java.util.logging.Logger;
 
-public class CustomProviderInstantiationService {
+public class CustomSigningServiceInstantiationService {
 
-    Logger logger = Logger.getLogger(CustomProviderInstantiationService.class.getName());
+    Logger logger = Logger.getLogger(CustomSigningServiceInstantiationService.class.getName());
 
     public SigningService instantiateProviderService(String keystore, String parameters) {
         String[] split = this.extractingKeystoreAndClassName(keystore);
@@ -39,8 +39,4 @@ public class CustomProviderInstantiationService {
         return false;
     }
 
-    public static interface CustomProviderServiceInterface {
-        public void validate(String keystore, String parameters);
-        public void init(String keystore, String parameters);
-    }
 }

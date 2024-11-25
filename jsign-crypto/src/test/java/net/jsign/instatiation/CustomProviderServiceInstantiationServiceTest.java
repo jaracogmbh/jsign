@@ -1,7 +1,7 @@
 
 package net.jsign.instatiation;
 
-import net.jsign.jca.CustomProviderInstantiationService;
+import net.jsign.jca.CustomSigningServiceInstantiationService;
 
 import net.jsign.testModel.TestProviderService;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 public class CustomProviderServiceInstantiationServiceTest {
 
-    CustomProviderInstantiationService underTest = new CustomProviderInstantiationService();
+    CustomSigningServiceInstantiationService underTest = new CustomSigningServiceInstantiationService();
 
     @Test
     public void instantiateProviderServiceTest(){

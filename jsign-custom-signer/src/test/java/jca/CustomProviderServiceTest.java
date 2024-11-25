@@ -7,7 +7,7 @@ import net.jsign.exception.NoEndpointSpecifiedException;
 import net.jsign.exception.SignRequestFailedException;
 import net.jsign.exception.NotABooleanValueException;
 import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.service.ExternalProviderService;
+import net.jsign.service.ExternalSigningService;
 import net.jsign.jca.SigningServicePrivateKey;
 import net.jsign.model.CertificateDTO;
 import net.jsign.model.Chain;
@@ -38,7 +38,7 @@ public class CustomProviderServiceTest {
         CertificateService certificateService = Mockito.mock(CertificateService.class);
         String keystore = "http://localhost:8089";
         String parameters = "SHA256withRSA|MGF1|32|false|group|12345|user|password";
-        ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
         System.out.println(underTest.getClass().getName());
         assertEquals("http://localhost:8089", underTest.getEndpoint());
         assertEquals("SHA256withRSA", underTest.getSignAlgorithm());
@@ -55,7 +55,7 @@ public class CustomProviderServiceTest {
         CertificateService certificateService = Mockito.mock(CertificateService.class);
         String keystore = "http://localhost:8089";
         String parameters = "SHA256withRSA|MGF1|32|false|group|12345|user|password";
-        ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
         try{
             underTest.validate(keystore, parameters);
             assertTrue(true);
@@ -69,7 +69,7 @@ public class CustomProviderServiceTest {
         CertificateService certificateService = Mockito.mock(CertificateService.class);
         String keystore = "http://localhost:8089";
         String parameters = "SHA256withRSA|MGF1|32|false|group|12345|user";
-        ExternalProviderService underTest = new ExternalProviderService(certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(certificateService);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.validate(keystore, parameters);
         });
@@ -82,7 +82,7 @@ public class CustomProviderServiceTest {
         CertificateService certificateService = Mockito.mock(CertificateService.class);
         String keystore = "http://localhost:8089";
         String parameters = "SHA256withRSA|MGF1|32o|false|group|12345|user|passwort";
-        ExternalProviderService underTest = new ExternalProviderService(certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(certificateService);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.validate(keystore, parameters);
         });
@@ -95,7 +95,7 @@ public class CustomProviderServiceTest {
         CertificateService certificateService = Mockito.mock(CertificateService.class);
         String keystore = "http://localhost:8089";
         String parameters = "SHA256withRSA|MGF1|32|falsee|group|12345|user|passwort";
-        ExternalProviderService underTest = new ExternalProviderService(certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(certificateService);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.validate(keystore, parameters);
         });
@@ -123,7 +123,7 @@ public class CustomProviderServiceTest {
                user,
                auth
        );*/
-       ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+       ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
        String cert = "MIIDUDCCAjigAwIBAgIJAKQICQFhO1zTMA0GCSqGSIb3DQEBCwUAMCUxIzAhBgNVBAMMGkpzaWduIENvZGUgU2lnbmluZyBDQSAyMDIyMB4XDTIyMTExNTE4MTUzM1oXDTQyMTExMDE4MTUzM1owOTE3MDUGA1UEAwwuSnNpZ24gQ29kZSBTaWduaW5nIFRlc3QgQ2VydGlmaWNhdGUgMjAyMiAoUlNBKTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKaQUuWQrHnHyjkdhwWdqT+W0g9t6vTnQmU4y/Xpg5wsF1NRMh2ujLj7PQx++l7fZJx3vC1JJ1/RM6CVFBYuazLwfDjl4/Nj4nglit+ijOJtXnBxSGIpKZTaORw9aYcMIvHRixZFqpVIfA0I7gjEB/WkI6Hq+ePu0ZGANorggJx/QP5IhBPzKSmv+83cQA954JN8EjdyuMzVs2SqOygUbKNai4jlmitEUyKB/29k9po+99pJ3KUQe+BHli3fyEFNzUdP9nB6FUw+9ko48/C0q7qKerKknYW3ysZwD70WMd40a/4U1cABSFbVvyIVAa4dxRoco52Gkt+x1GhOCztLtQ8CAwEAAaNvMG0wCQYDVR0TBAIwADALBgNVHQ8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwMwHQYDVR0OBBYEFBLEig5vFkfxsh/Oey8w5icoMTSTMB8GA1UdIwQYMBaAFJ9pNp0nqBx5bIhLCZF6EHl/ZnfaMA0GCSqGSIb3DQEBCwUAA4IBAQCFfbg7sXiWli9DyVz9LfrTzZOIwqilOSroemZ+W2YuKJEUs+NBBnmmmb2MQXZcm00fDKa0bSWJqGMfPeqsHZdMdlw4cZIhQ2wl67sdn/qtO8TpLcIZj2UlIgou8/afE6fN8w0mQPU9DOOPwDMzYQVJI3opuwVsAXj+82opBkx08yno2TIX7nt6PF51SMrqNVglzh8N31BAQ3CkjgPvnjDdgOxKsOubqFYzsMEtkmlF0EFS3BMJMvAHFGe1VRkhv1ejiBbaJXf50UGtJzgfnKYHR9HEaHoy4ka7FTHWKkEzjhsyjByGyVG8/jaelSJzqo3UbPXReg3yMPwWPqRpiCwh";
        Chain chain1 = new Chain("type", "MIIETTCCAjWgAwIBAgIJAMkyYFBPzGLZMA0GCSqGSIb3DQEBCwUAMDAxLjAsBgNVBAMMJUpzaWduIFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IDIwMjIwHhcNMjIxMTE1MTgxNTMzWhcNNDIxMTEwMTgxNTMzWjAlMSMwIQYDVQQDDBpKc2lnbiBDb2RlIFNpZ25pbmcgQ0EgMjAyMjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpixZGfxZalF9pemY88A0E9HpOnxZNOPHeG054vm0SQNvr865ygHkXYcWZA/yRZ2SFQ/Y98Ne2buO5gXz7a7OOrF1qzsIGIo7b1p6ueFYthb1EDKArA6tEieiDzHI1PbNGbsGBwDZfVMDeIL003mMugFk0tIADmBEhDbxgRa+tMJ1CiN6ZZwUhSdX46WGPah0L+q+Iw0b6nbMl/r30R20utKIp8SPCg5JutOqBMGXuNg9CELIHTskdZkcA1BcKtW1Vbc9vloWlfvfWq8Xba2pqJ7pyV/UiJIjOBzdGZT2+cjsjcfJT20i8t/0o/sONS06WwKbz90OGWMc8W9z0dqBkCAwEAAaN1MHMwDwYDVR0TBAgwBgEB/wIBADALBgNVHQ8EBAMCAQYwEwYDVR0lBAwwCgYIKwYBBQUHAwMwHQYDVR0OBBYEFJ9pNp0nqBx5bIhLCZF6EHl/ZnfaMB8GA1UdIwQYMBaAFNsIlZmOYVuVCwdDzsLTMOIDKQM+MA0GCSqGSIb3DQEBCwUAA4ICAQAThD8CGA+/T/fdw4jFWs4yFCnkpDFOYnCAs0zvzY3GnN9dQ1RjwJ2UtCHg8KIid9tR89vMnYgyk4Jst948FaWr17qzVRL5AwuKeE8xW2a5i18Lw2SwszAafcywSZEeuGtE58zl23gymfH1ADWwh8C+VVDLMCX1pFQXNdC+3MAMs75/QYe625YaDodw6MjkTDHIr9yY+UTbjePEJhMXOE00pwKHe/5khKrgaEGCINcIFcU2CtbwGKm7cbI1cjoecGGO+bMdrzFc86kTgG1bTULYUxm/E0Dj3UBLs0s3WjX3pcxpucyQ3Q5tlWA45vXMqOfP4QJ8m0QOimp8Br8eOyAgx37EtXhqN1hZ16pjMYYzgnigZK2M6/+IJbHCf1x+opub9fsXbZ8jdBwDLSBqzgHFhSS6NjFSO6CBJoDJ9wdXLkCZL6MB27jFij8o5QtJul5LuBCeFbk8moGwN3E5/U6fb/lewb8+pPTlvsQnnSVFe13XFF9MWWw6G3m48cpWbD4Gut7BbjemrWqcs/954GmYNfHUkAbg5sSVw/eT/bYCwXvFj/Z8cXG9p0vRWWbeXBAounp5lHEVSRBxOxM/oiJsXTRXLTdDrY6gixRB+qVczrS5US0GSU9hOPWj4YJ5NDPaNfIdphEWOK2yUABAaYZV+sAI0/9AU5FYoofSuf2AuA==");
        CertificateDTO certificate = new CertificateDTO("1", cert, List.of(chain1));
@@ -140,7 +140,7 @@ public class CustomProviderServiceTest {
        String parameters = "SHA256withRSA|MGF1|32|false|group|12345|user|password";
        String endpoint = "http://localhost:8089";
        String auth = "password";
-       ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+       ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
        when(certificateService.getCertificate("dummy", endpoint, auth)).thenThrow(new FailedCertificateExtractionException("error"));
        Exception exception = assertThrows(KeyStoreException.class, () -> underTest.getCertificateChain("dummy"));
        assertEquals("Failed to get certificate from server for user with id: user", exception.getMessage());
@@ -188,7 +188,7 @@ public class CustomProviderServiceTest {
        byte[] data = "Das ist die Datei".getBytes();
        SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
        byte[] expected = "this is the signature".getBytes();
-       ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+       ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
 
        String endcoded = Base64.getEncoder().encodeToString(expected);
 
@@ -217,7 +217,7 @@ public class CustomProviderServiceTest {
         SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
         byte[] expected = "this is the signature".getBytes();
 
-        ExternalProviderService underTest = new ExternalProviderService(keystore, parameters, certificateService);
+        ExternalSigningService underTest = new ExternalSigningService(keystore, parameters, certificateService);
         String endcoded = Base64.getEncoder().encodeToString(expected);
 
         SignatureResponse response = new SignatureResponse(
