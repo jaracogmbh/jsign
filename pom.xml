@@ -38,14 +38,22 @@
   </scm>
 
   <distributionManagement>
-    <snapshotRepository>
+    <!--<snapshotRepository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>-->
+    <repository>
+      <id>nexus</id>
+      <url>http://localhost:8081/#browse/browse:maven-releases/</url>
     </repository>
+    <snapshotRepository>
+      <id>nexus</id>
+      <url>http://localhost:8081/#browse/browse:maven-snapshots/</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <modules>
@@ -161,6 +169,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>3.0.1</version>
         <configuration>
+          <goals>deploy</goals>
           <tagNameFormat>@{project.version}</tagNameFormat>
           <releaseProfiles>release</releaseProfiles>
           <autoVersionSubmodules>true</autoVersionSubmodules>
