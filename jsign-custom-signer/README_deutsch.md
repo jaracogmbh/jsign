@@ -114,3 +114,13 @@ jarsigner -J-cp -Jjaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar;jsign-cu
     - diese beiden Flags müssen gesetzt werden, da ``jarsigner`` sonst nicht den richtigen Algorithmus für die Signature benutzt.
 - letzter Parameter ist der ``alias``. Dieser muss zwingend an letzter Stelle stehen.
 - Wenn wir in ``Jarsigner`` keinen ``tsurl`` Flag angeben, bekommen wir eine Warnung. Da die API das erstellen der Signatur übernimmt, ist es nicht notwendig den ``tsurl`` Flag zu setzen, weshalb die Warnung ignoriert werden kann.
+
+## Ausführen mit ``Environment Variable`` zum testen
+
+- Beispiel Linux:
+    
+```
+CKM_PASS=password123456 java -cp "jsign-custom-signer-1.0.0-SNAPSHOT-jar-with-dependencies.jar:jaraco-jsign-1.0.0-SNAPSHOT-jar-with-dependencies.jar" net.jsign.JsignCLI --storepass "SHA256WithRSA|SHA-256|0|true|itsGroup|1234|user" --keystore "http://localhost:8089|net.jsign.service.ExternalSigningService" --alias test --storetype CUSTOMPROVIDER psftp.exe
+```
+
+
