@@ -51,6 +51,8 @@ public class ExternalSigningService implements SigningService, CustomSigningServ
     String user;
     String auth;
 
+    boolean passwordInProperties = false;
+
     public ExternalSigningService(String keystore, String parameters){
         HttpClient client = HttpClient.newHttpClient();
         this.certificateService = new CertificateService(client);
@@ -229,13 +231,29 @@ public class ExternalSigningService implements SigningService, CustomSigningServ
             throw new IllegalArgumentException(new NoEndpointSpecifiedException("No endpoint specified for the signing service in the keystore parameter!"));
         }
         logger.info("Validating storepass parameter");
-        if (parameters == null || parameters.split("\\|").length != 8 || checker.checkIfStringisEmpty(parameters.split("\\|"))) {
+        if (parameters == null || parameters.split("\\|").length < 7 || checker.checkIfStringisEmpty(parameters.split("\\|"))) {
             logger.severe("storepass " + parameters + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
             logger.severe("storepass: " + parameters);
             throw new IllegalArgumentException("storepass " + parameters + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
         }
 
         String[] elements = parameters.split("\\|");
+        logger.info("Checking environment variables for password:");
+        //logger.info("CKM_PASS: " + System.getenv("HOME"));
+        if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length != 8) {
+            logger.severe("The CKM_PASS is not found in the environment variables for determining the password");
+            logger.severe("The password is also not provided in the storepass");
+            throw new IllegalArgumentException("The value of user is not found in the environment variables for" +
+                    " determining the password and no password is provided in the storepass");
+        }
+        else if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length == 8){
+            logger.info("The password is provided in the storepass");
+            passwordInProperties = false;
+        }else {
+            logger.info("The password is found in the environment variables");
+            passwordInProperties = true;
+        }
+
         logger.info("Validating signature algorithm parameter");
         boolean nonDecorateSignature;
         int saltLength;
@@ -284,8 +302,14 @@ public class ExternalSigningService implements SigningService, CustomSigningServ
         this.setServiceId(elements[5]);
         logger.info("Setting user to: " + elements[6]);
         this.setUser(elements[6]);
-        this.setAuth(elements[7]);
-        logger.info("auth was successfully set");
+        if(passwordInProperties){
+            logger.info("Setting auth to: " + System.getenv("CKM_PASS"));
+            this.setAuth(System.getenv("CKM_PASS"));
+        }else {
+            this.setAuth(elements[7]);
+            logger.info("auth was successfully set");
+        }
+
         //return this;
     }
 
@@ -396,4 +420,5 @@ public class ExternalSigningService implements SigningService, CustomSigningServ
     public void setAuth(String auth) {
         this.auth = auth;
     }
+
 }
