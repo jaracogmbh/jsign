@@ -30,17 +30,31 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
-import net.jsign.exception.NoEndpointSpecifiedException;
-import net.jsign.exception.NotABooleanValueException;
-import net.jsign.exception.NotACorrectIntegerValueException;
-import net.jsign.instantiation.CustomProviderServiceInstantiation;
-import net.jsign.jca.*;
+import net.jsign.exception.*;
+import net.jsign.jca.AmazonCredentials;
+import net.jsign.jca.AmazonSigningService;
+import net.jsign.jca.AzureKeyVaultSigningService;
+import net.jsign.jca.AzureTrustedSigningService;
+import net.jsign.jca.DigiCertOneSigningService;
+import net.jsign.jca.ESignerSigningService;
+import net.jsign.jca.GaraSignCredentials;
+import net.jsign.jca.GaraSignSigningService;
+import net.jsign.jca.GoogleCloudSigningService;
+import net.jsign.jca.HashiCorpVaultSigningService;
+import net.jsign.jca.OpenPGPCardSigningService;
+import net.jsign.jca.OracleCloudCredentials;
+import net.jsign.jca.OracleCloudSigningService;
+import net.jsign.jca.PIVCardSigningService;
+import net.jsign.jca.SigningServiceJcaProvider;
+import net.jsign.jca.CustomProviderService;
 import net.jsign.util.ParameterChecker;
+import net.jsign.util.PropertyLoader;
 
 /**
  * Type of a keystore.
@@ -115,21 +129,42 @@ public enum KeyStoreType {
     CUSTOMPROVIDER(false, false, false) {
         ParameterChecker checker = new ParameterChecker();
         Logger logger = Logger.getLogger(this.getClass().getName());
-        CustomProviderServiceInstantiation instantiationService = new CustomProviderServiceInstantiation();
-        String fullyQualifiedClassName = "net.jsign.jca.CustomProviderService";
+        //PropertyLoader propertyLoader = new PropertyLoader();
+        //Properties properties;
+        String[] elements;
+        boolean passwordInProperties = false;
         @Override
         void validate(KeyStoreBuilder params) {
             logger.info("Validating CUSTOMPROVIDER keystore parameters");
-            if (params.storepass() == null || params.storepass().split("\\|").length != 8 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
+
+            if (params.storepass() == null || params.storepass().split("\\|").length < 7 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
                 logger.severe("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
                 logger.severe("storepass: " + params.storepass());
-                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
+                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify at least the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>");
+            }else{
+                elements = params.storepass().split("\\|");
             }
+            logger.info("Checking environment variables for password:");
+            //logger.info("CKM_PASS: " + System.getenv("HOME"));
+            if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length != 8) {
+                logger.severe("The CKM_PASS is not found in the environment variables for determining the password");
+                logger.severe("The password is also not provided in the storepass");
+                throw new IllegalArgumentException("The value of user is not found in the environment variables for" +
+                        " determining the password and no password is provided in the storepass");
+            }
+            else if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length == 8){
+                logger.info("The password is provided in the storepass");
+                passwordInProperties = false;
+            }else {
+                logger.info("The password is found in the environment variables");
+                passwordInProperties = true;
+            }
+
         }
 
         @Override
         Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
-            String[] elements = params.storepass().split("\\|");
+            //String[] elements = params.storepass().split("\\|");
             boolean nonDecorateSignature;
             int saltLength;
             logger.info("Verifying the values of non decorate signature parameters");
@@ -147,8 +182,14 @@ public enum KeyStoreType {
                 logger.severe("The value of salt length is not an integer value");
                 throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
             }
-            return new SigningServiceJcaProvider(instantiationService.instantiateProviderService(fullyQualifiedClassName, params.keystore(), elements));
-            //return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+            if(passwordInProperties){
+                logger.info("Using the password found in the environment variables");
+                String password = System.getenv("CKM_PASS");
+                return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], password));
+            }else {
+                logger.info("Using the password provided in the storepass");
+                return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+            }
         }
 
         @Override
