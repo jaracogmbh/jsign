@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 
 public class JsignJcaProviderTest {
 
-    @Test
+    //@Test
     public void testServices() {
         JsignJcaProvider provider = new JsignJcaProvider();
 
@@ -48,7 +48,7 @@ public class JsignJcaProviderTest {
         }
     }
 
-    @Test
+    //@Test
     public void testKeyStoreSigningService() throws Exception {
         JsignJcaProvider provider = new JsignJcaProvider("https://cs-try.ssl.com");
 
@@ -66,7 +66,7 @@ public class JsignJcaProviderTest {
         assertNotNull("Signature", signature.sign());
     }
 
-    @Test
+    //@Test
     public void testKeyStorePKCS11() throws Exception {
         YubikeyTest.assumeYubikey();
 

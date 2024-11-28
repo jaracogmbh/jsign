@@ -32,23 +32,11 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
-import net.jsign.jca.AmazonCredentials;
-import net.jsign.jca.AmazonSigningService;
-import net.jsign.jca.AzureKeyVaultSigningService;
-import net.jsign.jca.AzureTrustedSigningService;
-import net.jsign.jca.DigiCertOneSigningService;
-import net.jsign.jca.ESignerSigningService;
-import net.jsign.jca.GaraSignCredentials;
-import net.jsign.jca.GaraSignSigningService;
-import net.jsign.jca.GoogleCloudSigningService;
-import net.jsign.jca.HashiCorpVaultSigningService;
-import net.jsign.jca.OpenPGPCardSigningService;
-import net.jsign.jca.OracleCloudCredentials;
-import net.jsign.jca.OracleCloudSigningService;
-import net.jsign.jca.PIVCardSigningService;
-import net.jsign.jca.SigningServiceJcaProvider;
+import net.jsign.jca.CustomSigningServiceInstantiationService;
+import net.jsign.jca.*;
 
 /**
  * Type of a keystore.
@@ -107,6 +95,71 @@ public enum KeyStoreType {
             }
 
             return ks;
+        }
+    },
+
+    /**
+     * Keystore type uses a custom signing service that communicates with an API endpoint.
+     * The `keystore` parameter specifies the API endpoint URL.
+     * The `storepass` parameter specifies the API parameters for authentication and the signing.
+     *
+     * Usage:
+     *   --storetype CUSTOMPROVIDER
+     *   --keystore <API endpoint URL>|<full class name of provider service>
+     *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
+     */
+    CUSTOMPROVIDER(false, false, false) {
+        //ParameterChecker checker = new ParameterChecker();
+        SigningServiceJcaProvider provider;
+        Logger logger = Logger.getLogger(this.getClass().getName());
+        CustomSigningServiceInstantiationService instantiationService = new CustomSigningServiceInstantiationService();
+
+
+        @Override
+        void validate(KeyStoreBuilder params) {
+            logger.info("Validating CUSTOMPROVIDER keystore parameters");
+            SigningService signingService = instantiationService.instantiateProviderService(params.keystore(), params.storepass());
+            provider = new SigningServiceJcaProvider(signingService);
+        }
+
+        @Override
+        Provider getProvider(KeyStoreBuilder params) {
+            if(provider != null) {
+                return provider;
+            } else {
+                String message = "Failed to instantiate CustomProviderService! Provider was null.";
+                logger.severe(message);
+                throw new RuntimeException(message);
+            }
+
+        }
+
+        @Override
+        boolean reuseKeyStorePassword() {
+            return false;
+        }
+
+        @Override
+        KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
+            try {
+                logger.info("Initializing KeyStore for CUSTOMPROVIDER");
+                logger.info("Endpoint: " + params.keystore().split("\\|")[0]);
+                logger.info("Storepass: " + (params.storepass() != null ? "Provided" : "Not Provided"));
+
+                KeyStore ks = KeyStore.getInstance("SigningService", provider);
+
+                logger.info("Created KeyStore instance with provider: " + provider.getName());
+
+                ks.load(null, null);  // no input stream, as expected for this setup
+
+                logger.info("KeyStore loaded successfully for CUSTOMPROVIDER");
+
+                return ks;
+            } catch (Exception e) {
+                logger.severe("Exception occurred while loading KeyStore:");
+                e.printStackTrace();
+                throw new KeyStoreException("Unable to load the CUSTOMPROVIDER keystore", e);
+            }
         }
     },
 
@@ -546,6 +599,7 @@ public enum KeyStoreType {
     };
 
 
+
     /** Tells if the keystore is contained in a local file */
     private final boolean fileBased;
 
@@ -574,7 +628,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) {
+    Provider getProvider(KeyStoreBuilder params){
         return null;
     }
 
