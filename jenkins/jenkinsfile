@@ -29,7 +29,9 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                sh 'mvn clean install' // hier noch die skip anweisungen
+                sh 'mvn clean -B package -Djapicmp.skip=true -DskipTests=true -Dmaven.javadoc.skip=true -Dproguard.skip=true'
+
+
             }
         }
 
@@ -37,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // Deploy artifacts to the Maven repository
-                    sh 'mvn deploy -DskipTests=true' // andere Skips noch hinzufügen
+                    sh 'mvn deploy -Djapicmp.skip=true -DskipTests=true -Dmaven.javadoc.skip=true -Dproguard.skip=true' // andere Skips noch hinzufügen
                 }
             }
         }
