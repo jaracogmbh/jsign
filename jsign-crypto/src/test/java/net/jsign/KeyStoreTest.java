@@ -32,7 +32,7 @@ public class KeyStoreTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.validate(keyStoreparams);
         });
-        assertEquals("storepass " + keyStoreparams.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>", exception.getMessage());
+        assertEquals("storepass " + keyStoreparams.parameterName() + " must specify at least the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>", exception.getMessage());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class KeyStoreTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.validate(keyStoreparams);
         });
-        assertEquals("storepass " + keyStoreparams.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>", exception.getMessage());
+        assertEquals("The value of user is not found in the environment variables for determining the password and no password is provided in the storepass", exception.getMessage());
     }
 
     @Test
@@ -75,23 +75,13 @@ public class KeyStoreTest {
     public void getProviderFailIntegerTest(){
         KeyStoreBuilder keyStoreparams = new KeyStoreBuilder();
         keyStoreparams.storepass("algSig|MFG1|keineNummer|true|group|1234|user|passwort1234");
-        keyStoreparams.keypass("http://localhost:8080");
+        keyStoreparams.keystore("http://localhost:8080");
         Exception exception = assertThrows(NotACorrectIntegerValueException.class, () -> {
             underTest.getProvider(keyStoreparams);
         });
         assertEquals("The value of salt length is not an integer value", exception.getMessage());
     }
 
-    @Test
-    public void getProviderFailIntegerTest2(){
-        KeyStoreBuilder keyStoreparams = new KeyStoreBuilder();
-        keyStoreparams.storepass("algSig|MFG1|32|true|group|keineNummer|user|passwort1234");
-        keyStoreparams.keypass("http://localhost:8080");
-        Exception exception = assertThrows(NotACorrectIntegerValueException.class, () -> {
-            underTest.getProvider(keyStoreparams);
-        });
-        assertEquals("The value of service id is not an integer value", exception.getMessage());
-    }
 
     @Test
     public void getProviderNoEndpointTest(){

@@ -44,7 +44,7 @@ public class CustomProviderServiceTest {
        String user = "user";
        String auth = "password";
 
-       CustomProviderService underTest = new CustomProviderService(
+       CustomProviderSigningService underTest = new CustomProviderSigningService(
                certificateService,
                endpoint,
                signAlgorithm,
@@ -78,7 +78,7 @@ public class CustomProviderServiceTest {
        String user = "user";
        String auth = "password";
 
-       CustomProviderService underTest = new CustomProviderService(
+       CustomProviderSigningService underTest = new CustomProviderSigningService(
                certificateService,
                endpoint,
                signAlgorithm,
@@ -110,7 +110,7 @@ public class CustomProviderServiceTest {
          String user = "user";
          String auth = "password";
          try {
-              CustomProviderService underTest = new CustomProviderService(
+              CustomProviderSigningService underTest = new CustomProviderSigningService(
                      certificateService,
                      endpoint,
                      signAlgorithm,
@@ -143,7 +143,7 @@ public class CustomProviderServiceTest {
        SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
        byte[] expected = "this is the signature".getBytes();
 
-       CustomProviderService underTest = new CustomProviderService(
+       CustomProviderSigningService underTest = new CustomProviderSigningService(
                certificateService,
                endpoint,
                signAlgorithm,
@@ -188,7 +188,7 @@ public class CustomProviderServiceTest {
         SigningServicePrivateKey key = new SigningServicePrivateKey("1", "RSA", null);
         byte[] expected = "this is the signature".getBytes();
 
-        CustomProviderService underTest = new CustomProviderService(
+        CustomProviderSigningService underTest = new CustomProviderSigningService(
                 certificateService,
                 endpoint,
                 signAlgorithm,

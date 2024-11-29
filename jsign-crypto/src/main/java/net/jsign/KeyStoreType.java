@@ -30,7 +30,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -52,9 +51,8 @@ import net.jsign.jca.OracleCloudCredentials;
 import net.jsign.jca.OracleCloudSigningService;
 import net.jsign.jca.PIVCardSigningService;
 import net.jsign.jca.SigningServiceJcaProvider;
-import net.jsign.jca.CustomProviderService;
+import net.jsign.jca.CustomProviderSigningService;
 import net.jsign.util.ParameterChecker;
-import net.jsign.util.PropertyLoader;
 
 /**
  * Type of a keystore.
@@ -165,6 +163,9 @@ public enum KeyStoreType {
         @Override
         Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
             //String[] elements = params.storepass().split("\\|");
+            if(elements == null){
+                elements = params.storepass().split("\\|");
+            }
             boolean nonDecorateSignature;
             int saltLength;
             logger.info("Verifying the values of non decorate signature parameters");
@@ -185,10 +186,10 @@ public enum KeyStoreType {
             if(passwordInProperties){
                 logger.info("Using the password found in the environment variables");
                 String password = System.getenv("CKM_PASS");
-                return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], password));
+                return new SigningServiceJcaProvider(new CustomProviderSigningService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], password));
             }else {
                 logger.info("Using the password provided in the storepass");
-                return new SigningServiceJcaProvider(new CustomProviderService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+                return new SigningServiceJcaProvider(new CustomProviderSigningService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
             }
         }
 

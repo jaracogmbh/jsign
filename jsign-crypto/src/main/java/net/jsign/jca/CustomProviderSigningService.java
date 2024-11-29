@@ -26,9 +26,9 @@ import java.util.logging.Logger;
 
 
 /**
- * Custom signing service implementation for a mock API.
+ * A CustomProviderSigningService is a SigningService that uses a custom provider to sign data via an external API.
  */
-public class CustomProviderService implements SigningService {
+public class CustomProviderSigningService implements SigningService {
     CertificateService certificateService;
     private final Logger logger = Logger.getLogger(DigiCertOneSigningService.class.getName());
 
@@ -57,15 +57,15 @@ public class CustomProviderService implements SigningService {
      * @param auth
      * @throws NoEndpointSpecifiedException
      */
-    public CustomProviderService(String endpoint,
-                                 String signAlgorithm,
-                                 String mgfAlgorithm,
-                                 int saltLength,
-                                 boolean nonDecorateSignature,
-                                 String group,
-                                 String serviceId,
-                                 String user,
-                                 String auth) throws NoEndpointSpecifiedException {
+    public CustomProviderSigningService(String endpoint,
+                                        String signAlgorithm,
+                                        String mgfAlgorithm,
+                                        int saltLength,
+                                        boolean nonDecorateSignature,
+                                        String group,
+                                        String serviceId,
+                                        String user,
+                                        String auth) throws NoEndpointSpecifiedException {
         HttpClient client = HttpClient.newHttpClient();
         certificateService = new CertificateService(client);
         if (endpoint == null) {
@@ -95,16 +95,16 @@ public class CustomProviderService implements SigningService {
     }
 
     // For testing purposes
-    public CustomProviderService(CertificateService certificateService,
-                                 String endpoint,
-                                 String signAlgorithm,
-                                 String mgfAlgorithm,
-                                 int saltLength,
-                                 boolean nonDecorateSignature,
-                                 String group,
-                                 String serviceId,
-                                 String user,
-                                 String auth) throws NoEndpointSpecifiedException {
+    public CustomProviderSigningService(CertificateService certificateService,
+                                        String endpoint,
+                                        String signAlgorithm,
+                                        String mgfAlgorithm,
+                                        int saltLength,
+                                        boolean nonDecorateSignature,
+                                        String group,
+                                        String serviceId,
+                                        String user,
+                                        String auth) throws NoEndpointSpecifiedException {
         this.certificateService = certificateService;
         if (endpoint == null) {
             logger.severe("No endpoint specified for the signing service service");
