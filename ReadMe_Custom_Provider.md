@@ -43,7 +43,8 @@ Es wurden folgende Änderungen am Originalcode von ``jsign`` vorgenommen:
      - die Service Klasse sendet ein ``HTTP POST`` Request mit ``Basic Authentication`` und einen ``Request Body`` bestehend aus den Eingabeparametern an die API.
      - die API liefert dann die Signatur zurück.
 
-### Ausführung über jsign
+## Ausführung
+## Ausführung über jsign
 
 Für die Ausführung des ``Custom Provider Signing Service`` müssen folgende jsign Parameter gesetzt sein:
 
@@ -55,7 +56,7 @@ Für die Ausführung des ``Custom Provider Signing Service`` müssen folgende js
 - ``tsaurl``: URL für den Zeitstempel
 - ``CKM_PASS`` Environment Variable: Passwort für die Authentifizierung
 
-#### Authentifizierung mit ``CKM_PASS`` Environment Variable
+### Authentifizierung mit ``CKM_PASS`` Environment Variable
 Es gibt zwei Möglichkeiten, wie die Authentifizierung für die API erfolgen kann:
 1. Über den ``storepass`` Parameter
    - dort kann das Passwort als letzten Parameter direkt mit übergeben werden
@@ -64,9 +65,10 @@ Es gibt zwei Möglichkeiten, wie die Authentifizierung für die API erfolgen kan
    - das Passwort wird dann automatisch aus der Environment Variable gelesen und für die Authentifizierung verwendet.
    - das Passwort wird dann nicht mehr im ``storepass`` Parameter übergeben.
 
-#### ``storetype`` Parameter
+### ``storetype`` Parameter
 Der ``storetype`` Parameter ist ein String, der den Typ des KeyStores angibt. In diesem Fall ist der Typ ``CUSTOMPROVIDER``. Dieser Parameter ist notwendig, damit das Programm weiß, dass es sich um den ``Custom Provider Signing Service`` handelt.
-#### ```storepass``` Parameter
+
+### ```storepass``` Parameter
 Der ``storepass`` Parameter ist ein String, der die folgenden Informationen enthält:
 - ``signature algorithm``: Signatur Algorithmus
 - ``mgf1 algorithm``: MGF1 Algorithmus
@@ -80,7 +82,7 @@ Der ``storepass`` Parameter ist ein String, der die folgenden Informationen enth
 - ``user``: Benutzer Identifikation
 - (Optional) ``auth``: Authentifizierung für die Basic Authentifizierung über die HTTP Header
 
-##### Aufbau des ``storepass`` Parameters
+#### Aufbau des ``storepass`` Parameters
 Da relativ viele Informationen im ``storepass`` übergeben werden müssen, ist es wichtig, dass die Informationen in der richtigen Reihenfolge und mit dem richtigen Trennzeichen übergeben werden. Das Trennzeichen ist der ``|``. Die Reihenfolge der Informationen ist wie folgt:
 
 - Ohne Authentifizierung:
@@ -93,7 +95,7 @@ Da relativ viele Informationen im ``storepass`` übergeben werden müssen, ist e
 ```
 Auperdem ist zu beachten, dass leere Werte (``||``) nicht erlaubt sind. Hier wird dann ein Fehler geworfen und das Programm wird beendet. Auch müssen alle Werte gesetzt werden.
 
-##### Beispiel für den ``storepass`` Parameter
+#### Beispiel für den ``storepass`` Parameter
 - Ohne Authentifizierung:
 ``` 
 SHA256WithRSA|SHA-256|32|true|itsGroup|1234|user
@@ -104,10 +106,10 @@ SHA256WithRSA|SHA-256|32|true|itsGroup|1234|user
 SHA256WithRSA|SHA-256|32|true|itsGroup|1234|user|password12345
 ```
 
-#### Endpunkt
+### Endpunkt
 Sowohl das Zertifikat als auch die Signature werden über eine API ermittelt bzw. erstellt. Der Endpunkt wird über den Parameter ``keysotre`` übergeben. Der Endpunkt ist dabei nur der Hostname und der Port (Oder die Domain). Der Pfad der Endpunkte für die Zertifikate und Signaturen sind im Programm festgelegt. 
 
-#### Ausführung über die Kommando Zeile
+### Ausführung über die Kommando Zeile
 - Beispiel:
 
 - Ohne Authentifizierung:
