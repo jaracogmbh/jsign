@@ -1,6 +1,6 @@
 # Custome Provider Signing Service für das Signieren von Dateien über eine API
 ## Zielsetzung
-Es soll ein ``Custom Provider Signing Service`` entwickelt werden, der Dateien mittels einer externen API signiert. Der Service soll all die benötigten Informationen zum Signieren über die Kommandozeile erhalten. Mit diesen Informationen wird dann einmal das benötigte Certificate und einmal die Signatur über die API ermittelt. Das Signieren wird somit über eine externe API durchgeführt.
+Es soll ein ``Custom Provider Signing Service`` entwickelt werden, der Dateien mittels einer externen API signiert. Der Service soll all die benötigten Informationen zum Signieren über die Kommandozeile erhalten. Mit diesen Informationen wird dann einmal das benötigte Zertifikat und einmal die Signatur über die API ermittelt. Das Signieren wird somit über eine externe API durchgeführt.
 ## Versionshistorie
 Unser Projekt baut auf der ``jsign Version 7.0-SNAPSHOT`` von [ebourg](https://github.com/ebourg/jsign) auf. Diese Version wurde von uns erweitert, um den ``Custom Provider Signing Service`` zu implementieren. Unser Projekt wird auf die Version ``1.0.0`` gesetzt.
 
