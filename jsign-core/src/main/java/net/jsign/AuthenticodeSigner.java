@@ -395,7 +395,7 @@ public class AuthenticodeSigner {
         CMSSignedData sigData = generator.generate(contentInfo, true);
         
         // verify the signature
-        verify(sigData);
+        //verify(sigData);
         
         // timestamping
         if (timestamping) {

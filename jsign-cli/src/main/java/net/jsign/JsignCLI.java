@@ -54,6 +54,16 @@ public class JsignCLI {
 
     public static void main(String... args) {
         try {
+            String[] test = new String[]{
+                    "-keystorehttp://localhost:8089",
+                    "-storetypeCUSTOMPROVIDER",
+                    "-aliasjsign-2022-key",
+                    "-keypasspassword123",
+                    "-storepassSHA256WithRSA|SHA-256|32|true|itsGroup|1234|user",
+                    //"-storepass|||||||",
+                    "-tsaurlhttp://timestamp.digicert.com",
+                    "psftp.exe"
+            };
             new JsignCLI().execute(args);
         } catch (SignerException | IllegalArgumentException | ParseException e) {
             System.err.println("jsign: " + e.getMessage());

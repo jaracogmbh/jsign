@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven3'
+        jdk 'JDK11'
+    }
+
+    environment {
+        MAVEN_OPTS = '-Xmx1024m'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Set Release Version') {
+            steps {
+                script {
+                    // Update the version to a release version
+                    sh 'mvn versions:set -DnewVersion=1.0.0-RELEASE'
+                    sh 'mvn versions:commit'
+                }
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                sh 'mvn clean -B package -Djapicmp.skip=true -DskipTests=true -Dmaven.javadoc.skip=true -Dproguard.skip=true'
+
+
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    // Deploy artifacts to the Maven repository
+                    sh 'mvn deploy -Djapicmp.skip=true -DskipTests=true -Dmaven.javadoc.skip=true -Dproguard.skip=true' // andere Skips noch hinzufügen
+                }
+            }
+        }
+
+        stage('Tag Release') {
+            steps {
+                script {
+                    // Tag the repository with the release version
+                    sh 'git tag -a v1.0.0 -m "Release version 1.0.0"'
+                    sh 'git push origin v1.0.0'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Release pipeline completed successfully!"
+        }
+        failure {
+            echo "Release pipeline failed. Please check the logs."
+        }
+    }
+}

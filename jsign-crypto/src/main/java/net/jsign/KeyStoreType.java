@@ -32,8 +32,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 
+import net.jsign.exception.*;
 import net.jsign.jca.AmazonCredentials;
 import net.jsign.jca.AmazonSigningService;
 import net.jsign.jca.AzureKeyVaultSigningService;
@@ -49,6 +51,8 @@ import net.jsign.jca.OracleCloudCredentials;
 import net.jsign.jca.OracleCloudSigningService;
 import net.jsign.jca.PIVCardSigningService;
 import net.jsign.jca.SigningServiceJcaProvider;
+import net.jsign.jca.CustomProviderSigningService;
+import net.jsign.util.ParameterChecker;
 
 /**
  * Type of a keystore.
@@ -107,6 +111,114 @@ public enum KeyStoreType {
             }
 
             return ks;
+        }
+    },
+
+    /**
+     * Keystore type uses a custom signing service that communicates with an API endpoint.
+     * The `keystore` parameter specifies the API endpoint URL.
+     * The `storepass` parameter specifies the API parameters for authentication and the signing.
+     *
+     * Usage:
+     *   --storetype CUSTOMPROVIDER
+     *   --keystore <API endpoint URL>
+     *   --storepass <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>
+     */
+    CUSTOMPROVIDER(false, false, false) {
+        ParameterChecker checker = new ParameterChecker();
+        Logger logger = Logger.getLogger(this.getClass().getName());
+        //PropertyLoader propertyLoader = new PropertyLoader();
+        //Properties properties;
+        String[] elements;
+        boolean passwordInProperties = false;
+        @Override
+        void validate(KeyStoreBuilder params) {
+            logger.info("Validating CUSTOMPROVIDER keystore parameters");
+
+            if (params.storepass() == null || params.storepass().split("\\|").length < 7 || checker.checkIfStringisEmpty(params.storepass().split("\\|"))) {
+                logger.severe("storepass " + params.parameterName() + " must specify the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>|<auth>");
+                logger.severe("storepass: " + params.storepass());
+                throw new IllegalArgumentException("storepass " + params.parameterName() + " must specify at least the needed Signing Service parameters: <signature algorithm>|<mgf1 algorithm>|<salt length>|<non decorate signature>|<group>|<service id>|<user>");
+            }else{
+                elements = params.storepass().split("\\|");
+            }
+            logger.info("Checking environment variables for password:");
+            //logger.info("CKM_PASS: " + System.getenv("HOME"));
+            if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length != 8) {
+                logger.severe("The CKM_PASS is not found in the environment variables for determining the password");
+                logger.severe("The password is also not provided in the storepass");
+                throw new IllegalArgumentException("The value of user is not found in the environment variables for" +
+                        " determining the password and no password is provided in the storepass");
+            }
+            else if((System.getenv("CKM_PASS") == null || System.getenv("CKM_PASS") == "") && elements.length == 8){
+                logger.info("The password is provided in the storepass");
+                passwordInProperties = false;
+            }else {
+                logger.info("The password is found in the environment variables");
+                passwordInProperties = true;
+            }
+
+        }
+
+        @Override
+        Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
+            //String[] elements = params.storepass().split("\\|");
+            if(elements == null){
+                elements = params.storepass().split("\\|");
+            }
+            boolean nonDecorateSignature;
+            int saltLength;
+            logger.info("Verifying the values of non decorate signature parameters");
+            if(checker.checkIfBoolean(elements[3])) {
+                nonDecorateSignature = Boolean.parseBoolean(elements[3]);
+            }else {
+                logger.severe("The value of non decorate signature is not a boolean value");
+                throw new NotABooleanValueException("The value of non decorate signature is not a boolean value");
+            }
+            logger.info("Verifying the values of salt length parameters");
+            if(checker.checkIfInteger(elements[2])) {
+                saltLength = Integer.parseInt(elements[2]);
+            }
+            else{
+                logger.severe("The value of salt length is not an integer value");
+                throw new NotACorrectIntegerValueException("The value of salt length is not an integer value");
+            }
+            if(passwordInProperties){
+                logger.info("Using the password found in the environment variables");
+                String password = System.getenv("CKM_PASS");
+                return new SigningServiceJcaProvider(new CustomProviderSigningService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], password));
+            }else {
+                logger.info("Using the password provided in the storepass");
+                return new SigningServiceJcaProvider(new CustomProviderSigningService(params.keystore(), elements[0], elements[1], saltLength, nonDecorateSignature, elements[4], elements[5], elements[6], elements[7]));
+            }
+        }
+
+        @Override
+        boolean reuseKeyStorePassword() {
+            return false;
+        }
+
+        @Override
+        KeyStore getKeystore(KeyStoreBuilder params, Provider provider) throws KeyStoreException {
+            try {
+                logger.info("Initializing KeyStore for CUSTOMPROVIDER");
+                logger.info("Endpoint: " + params.keystore());
+                logger.info("Storepass: " + (params.storepass() != null ? "Provided" : "Not Provided"));
+
+                KeyStore ks = KeyStore.getInstance("SigningService", provider);
+
+                logger.info("Created KeyStore instance with provider: " + provider.getName());
+
+                ks.load(null, null);  // no input stream, as expected for this setup
+
+                logger.info("KeyStore loaded successfully for CUSTOMPROVIDER");
+
+                return ks;
+            } catch (Exception e) {
+                logger.severe("Exception occurred while loading KeyStore:");
+                e.printStackTrace();
+                throw new KeyStoreException("Unable to load the CUSTOMPROVIDER keystore", e);
+            }
         }
     },
 
@@ -546,6 +658,7 @@ public enum KeyStoreType {
     };
 
 
+
     /** Tells if the keystore is contained in a local file */
     private final boolean fileBased;
 
@@ -574,7 +687,7 @@ public enum KeyStoreType {
     /**
      * Returns the security provider to use the keystore.
      */
-    Provider getProvider(KeyStoreBuilder params) {
+    Provider getProvider(KeyStoreBuilder params) throws NoEndpointSpecifiedException, NotABooleanValueException, NotACorrectIntegerValueException {
         return null;
     }
 
